@@ -1,15 +1,30 @@
-N = 10;   % Number of needles
-L = 4;      % Length of needles
-D = 2;      % Distance between planks
-NoP = 4;    % Number of planks
+% Config
+opengl('save', 'hardware');
 
-size = 2;
+% Variables
+N = 1000;		% Number of needles
+L = 0.30;		% Length of needles
+size = 5;
 
-if L > D
-    msgbox('L > D, this cannot happen', 'Error', 'error');
+% Make coordinates
+x_coord = L + rand(1,N) * (size - 2*L);
+y_coord = L + rand(1,N) * (size - 2*L);
+
+angles = rand(1, N) * 360;
+x_angle = x_coord + L * cosd(angles);
+y_angle = y_coord + L * sind(angles);
+
+% Plot the needles
+plot(axes, [xb; xe], [yb; ye], 'LineWidth', 2)
+axis square
+
+hold on
+
+% Plot the floor
+for i = 0:L:size
+	xline(i, '-', 'LineWidth', 3)
 end
 
-x_coords = rand(1, N) * size;
-y_coords = rand(1, N) * size;
-
-plot(x_coords, y_coords);
+% Estimate Pi
+n = sum(floor(x_coord / L) ~= floor(x_angle / L));
+piEstimate = 2 * N / n
