@@ -15,7 +15,7 @@ x_angle = x_coord + L * cosd(angles);
 y_angle = y_coord + L * sind(angles);
 
 % Plot the needles
-plot(axes, [xb; xe], [yb; ye], 'LineWidth', 2)
+plot(axes, [x_coord; x_angle], [y_coord; y_angle], 'LineWidth', 2)
 axis square
 
 hold on
