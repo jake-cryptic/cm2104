@@ -4,14 +4,14 @@ opengl('save', 'hardware');
 
 % Variables
 S = 1;		% Scaling factor
-N = 5;		% Number of squares
+N = 10000000;	% Number of squares
 NoP = 10;	% Number of planks
 D = S/NoP;	% Distance between planks
 SL = D/4;	% Length of squares
 
 % Plot the floor
 for i = 0:D:S
-	xline(i, '-', 'LineWidth', 3)
+	xline(i, '-', 'LineWidth', 2)
 end
 
 % Make coordinates
@@ -33,6 +33,17 @@ ycr = [...
 ];
 
 % Plot all the things
-patch(xcr, ycr, 'red');
+% patch(xcr, ycr, 'red');
+
+% aa
+
+n = 0;
+n = n + sum(floor(xcr(1, :)/D) ~= floor(xcr(2, :)/D)) + ...
+		sum(floor(xcr(2, :)/D) ~= floor(xcr(3, :)/D)) + ...
+		sum(floor(xcr(3, :)/D) ~= floor(xcr(4, :)/D)) + ...
+		sum(floor(xcr(4, :)/D) ~= floor(xcr(1, :)/D))
+t = N*4;
+pi_estimate = t/n
+
 axis square
 hold on
