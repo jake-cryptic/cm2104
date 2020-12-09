@@ -16,8 +16,7 @@ angles = rand(1, N) * 360
 xc = [x_coord; x_coord + L; x_coord + L; x_coord]
 yc = [y_coord; y_coord; y_coord + L; y_coord + L]
 
-cos_ang = cosd(angles)
-sin_ang = sind(angles)
+xa 
 
 patch(xc, yc, c)
 colorbar
