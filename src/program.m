@@ -3,29 +3,36 @@
 opengl('save', 'hardware');
 
 % Variables
-N = 3;		% Number of needles
-L = 1;		% Length of needles
-size = 5;
-
-% Make coordinates
-x_coord = rand(1, N);
-y_coord = rand(1, N);
-c = rand(1, N);
-
-angles = rand(1, N) * 360
-xc = [x_coord; x_coord + L; x_coord + L; x_coord]
-yc = [y_coord; y_coord; y_coord + L; y_coord + L]
-
-cos_ang = cosd(angles)
-sin_ang = sind(angles)
-
-patch(xc, yc, c)
-colorbar
-axis square
-
-hold on
+S = 1;		% Scaling factor
+N = 5;		% Number of squares
+NoP = 10;	% Number of planks
+D = S/NoP;	% Distance between planks
+SL = D/4;	% Length of squares
 
 % Plot the floor
-for i = 0:L:size
-	%xline(i, '-', 'LineWidth', 3)
+for i = 0:D:S
+	xline(i, '-', 'LineWidth', 3)
 end
+
+% Make coordinates
+sq_angles = rand(1, N) * 360;
+xc = rand(1, N);
+yc = rand(1, N);
+
+xcr = [...
+	SL * cosd(sq_angles) + SL * sind(sq_angles) + xc;...
+	SL * cosd(sq_angles) - SL * sind(sq_angles) + xc;...
+	-SL * cosd(sq_angles) - SL * sind(sq_angles) + xc;...
+	-SL * cosd(sq_angles) + SL * sind(sq_angles) + xc;...
+];
+ycr = [...
+	-SL * sind(sq_angles) + SL * cosd(sq_angles) + yc;...
+	-SL * sind(sq_angles) - SL * cosd(sq_angles) + yc;...
+	SL * sind(sq_angles) - SL * cosd(sq_angles) + yc;...
+	SL * sind(sq_angles) + SL * cosd(sq_angles) + yc;...
+];
+
+% Plot all the things
+patch(xcr, ycr, 'red');
+axis square
+hold on

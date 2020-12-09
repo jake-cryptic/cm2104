@@ -3,23 +3,31 @@
 opengl('save', 'hardware');
 
 % Variables
-N = 3;		% Number of needles
-L = 1;		% Length of needles
-size = 5;
+N = 1;		% Number of needles
+D = 1;		% Distance between planks
+SL = D/2;	% Length of squares
+scale = 5;	% Scaling factor
 
 % Make coordinates
-x_coord = rand(1, N);
-y_coord = rand(1, N);
-c = rand(1, N);
+sq_angles = rand(1, N) * 360;
+x_coords = rand(1, N);
+y_coords = rand(1, N);
 
-angles = rand(1, N) * 360
-xc = [x_coord; x_coord + L; x_coord + L; x_coord]
-yc = [y_coord; y_coord; y_coord + L; y_coord + L]
+x_plot = [...
+	SL * cosd(sq_angles) + SL * sind(sq_angles) + x_coords;...
+	SL * cosd(sq_angles) - SL * sind(sq_angles) + x_coords;...
+	-SL * cosd(sq_angles) - SL * sind(sq_angles) + x_coords;...
+	-SL * cosd(sq_angles) + SL * sind(sq_angles) + x_coords;...
+];
+y_plot = [...
+	-SL * sind(sq_angles) + SL * cosd(sq_angles) + y_coords;...
+	-SL * sind(sq_angles) - SL * cosd(sq_angles) + y_coords;...
+	SL * sind(sq_angles) - SL * cosd(sq_angles) + y_coords;...
+	SL * sind(sq_angles) + SL * cosd(sq_angles) + y_coords;...
+];
 
-xa 
+patch(x_plot, y_plot, 'red');
 
-patch(xc, yc, c)
-colorbar
 axis square
 
 hold on
