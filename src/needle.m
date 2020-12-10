@@ -1,8 +1,8 @@
-S	=	1;					% Scale factor
+S	=	4;					% Scale factor
 N	=	1000;				% Number of needles
 NoP	=	10;					% Number of planks
 L	=	S/NoP;
-size = 5;
+size =	5;
 
 disp(N);
 
