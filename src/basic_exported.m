@@ -23,6 +23,10 @@ classdef basic_exported < matlab.apps.AppBase
         LengthofsquaresidesSliderLabel  matlab.ui.control.Label
         LengthofsquaresidesSlider       matlab.ui.control.Slider
         WarningSquarelengthPlankdistanceLabel  matlab.ui.control.Label
+        NumberofhorizontalplanksSliderLabel  matlab.ui.control.Label
+        NumberofhorizontalplanksSlider  matlab.ui.control.Slider
+        UsegridSwitchLabel              matlab.ui.control.Label
+        UsegridSwitch                   matlab.ui.control.Switch
         UIControlsTab                   matlab.ui.container.Tab
         FontSizeSliderLabel             matlab.ui.control.Label
         FontSizeSlider                  matlab.ui.control.Slider
@@ -49,10 +53,15 @@ classdef basic_exported < matlab.apps.AppBase
     properties (Access = private)
 		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
         S	    =	1					% Scale factor
-        N	    =	2                   % Number of needles
-		NoP	    =	5					% Number of planks
-		D                               % Distance between planks
-		SL                              % Length of square side
+        N	    =	2000			    % Number of needles
+		NoVP	=	5				    % Number of planks
+        NoHP    =   5                   % Number of horizontal planks
+		DV							    % Distance between vertical planks
+		DH							    % Distance between horizontal planks
+		SL							    % Length of square side
+        
+        % Custom variables
+        uiGridlineWidth =   1
 		
 		% Patch object
 		p
@@ -72,16 +81,25 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function updatePlankCount(app, plankCount)
-			app.NoP = plankCount;
-			app.D =	app.S / app.NoP;
+			app.NoVP = plankCount;
+			app.DV = app.S / app.NoVP;
             makeWarningForLgtD(app);
 			
 			updateSquarePlot(app);
         end
+		
+        function updateHorizontalPlankCount(app, plankCount)
+			app.NoVP = plankCount;
+			app.DH = app.S / app.NoVP;
+            makeWarningForLgtD(app);
+			
+            set(app.UsegridSwitch, 'Value', 'On');
+            
+			updateSquarePlot(app);
+        end
         
         function makeWarningForLgtD(app)
-            % Show error if  L > D
-            if app.SL > app.D
+            if app.SL > app.DV
                 set(app.WarningSquarelengthPlankdistanceLabel, 'Visible', true);
             else
                 set(app.WarningSquarelengthPlankdistanceLabel, 'Visible', false);
@@ -111,6 +129,7 @@ classdef basic_exported < matlab.apps.AppBase
 			
 			updateSquareRanomisation(app);
 			updatePlotFloor(app);
+			updatePlotGrid(app);
 			
             rad = app.SL / 2;
 			app.xcr = [...
@@ -137,24 +156,24 @@ classdef basic_exported < matlab.apps.AppBase
 		
 		function calculateSquarePi(app)
 			n = 0;
-			n = n + sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)) + ...
-					sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) + ...
-					sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)) + ...
-					sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
+			n = n + sum(floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV)) + ...
+					sum(floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV)) + ...
+					sum(floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV)) + ...
+					sum(floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV));
             
 			t = 2 * (app.N * 4) * app.SL;
 			
-			pi_estimate = t / (n * app.D);
+			pi_estimate = t / (n * app.DV);
 			UIUpdateOutEstimate(app, ['Pi Estimate: ' num2str(pi_estimate)]);
 		end
 		
 		function calculateSquareSqrtTwo(app)
-            total_intersected = sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D) | floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D) |...
-                floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D) | floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
+            total_intersected = sum(floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
+                floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV));
             
             total_consequtive = 0;
-            total_consequtive = total_consequtive + sum((floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) & (floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D))) + ...
-                sum((floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)) & (floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)));
+            total_consequtive = total_consequtive + sum((floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV)) & (floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV))) + ...
+                sum((floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV)) & (floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV)));
             
             total_con_over_int = total_consequtive/total_intersected;
 			
@@ -167,8 +186,14 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function updatePlotFloor(app)
-			for i = 0:app.D:app.S
-				xline(app.UIAxes, i,  '-', 'LineWidth', 1);
+			for i = 0:app.DV:app.S
+				xline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth);
+			end
+		end
+		
+		function updatePlotGrid(app)
+			for i = 0:app.DH:app.S
+				yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth);
 			end
 		end
 	end
@@ -178,8 +203,8 @@ classdef basic_exported < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
-			app.D	=	app.S / app.NoP;
-			app.SL	=	app.D / 2;
+			app.DV	=	app.S / app.NoVP;
+			app.SL	=	app.DV / 2;
         end
 
         % Value changed function: NumberofsquaresSpinner
@@ -252,6 +277,27 @@ classdef basic_exported < matlab.apps.AppBase
             else
                 app.calc = 2;
             end
+            
+            %updateSquarePlot(app);
+        end
+
+        % Value changed function: NumberofhorizontalplanksSlider
+        function NumberofhorizontalplanksSliderValueChanged(app, event)
+            value = app.NumberofhorizontalplanksSlider.Value;
+            
+            % Snap to nearest value
+            [~, minVal] = min(abs(value - event.Source.MajorTicks(:)));
+			event.Source.Value = event.Source.MajorTicks(minVal);
+            
+            updateHorizontalPlankCount(app, minVal);
+        end
+
+        % Value changed function: GridLineThicknessSpinner
+        function GridLineThicknessSpinnerValueChanged(app, event)
+            value = app.GridLineThicknessSpinner.Value;
+            app.uiGridlineWidth = value;
+            
+            updateSquarePlot(app);
         end
     end
 
@@ -390,6 +436,32 @@ classdef basic_exported < matlab.apps.AppBase
             app.WarningSquarelengthPlankdistanceLabel.Position = [37 115 228 22];
             app.WarningSquarelengthPlankdistanceLabel.Text = 'Warning! Square length > Plank distance ';
 
+            % Create NumberofhorizontalplanksSliderLabel
+            app.NumberofhorizontalplanksSliderLabel = uilabel(app.PlotControlsTab);
+            app.NumberofhorizontalplanksSliderLabel.HorizontalAlignment = 'right';
+            app.NumberofhorizontalplanksSliderLabel.Position = [2 293 155 22];
+            app.NumberofhorizontalplanksSliderLabel.Text = 'Number of horizontal planks';
+
+            % Create NumberofhorizontalplanksSlider
+            app.NumberofhorizontalplanksSlider = uislider(app.PlotControlsTab);
+            app.NumberofhorizontalplanksSlider.Limits = [1 10];
+            app.NumberofhorizontalplanksSlider.MajorTicks = [1 2 3 4 5 6 7 8 9 10];
+            app.NumberofhorizontalplanksSlider.MajorTickLabels = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10'};
+            app.NumberofhorizontalplanksSlider.ValueChangedFcn = createCallbackFcn(app, @NumberofhorizontalplanksSliderValueChanged, true);
+            app.NumberofhorizontalplanksSlider.MinorTicks = [];
+            app.NumberofhorizontalplanksSlider.Position = [8 282 135 7];
+            app.NumberofhorizontalplanksSlider.Value = 5;
+
+            % Create UsegridSwitchLabel
+            app.UsegridSwitchLabel = uilabel(app.PlotControlsTab);
+            app.UsegridSwitchLabel.HorizontalAlignment = 'center';
+            app.UsegridSwitchLabel.Position = [198 257 50 22];
+            app.UsegridSwitchLabel.Text = 'Use grid';
+
+            % Create UsegridSwitch
+            app.UsegridSwitch = uiswitch(app.PlotControlsTab, 'slider');
+            app.UsegridSwitch.Position = [198 289 45 20];
+
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
             app.UIControlsTab.Title = 'UI Controls';
@@ -440,7 +512,10 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create GridLineThicknessSpinner
             app.GridLineThicknessSpinner = uispinner(app.UIControlsTab);
+            app.GridLineThicknessSpinner.Limits = [1 5];
+            app.GridLineThicknessSpinner.ValueChangedFcn = createCallbackFcn(app, @GridLineThicknessSpinnerValueChanged, true);
             app.GridLineThicknessSpinner.Position = [142 283 100 22];
+            app.GridLineThicknessSpinner.Value = 1;
 
             % Create ModifyGridLineColorButton
             app.ModifyGridLineColorButton = uibutton(app.UIControlsTab, 'push');
