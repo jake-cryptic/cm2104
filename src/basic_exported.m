@@ -22,6 +22,7 @@ classdef basic_exported < matlab.apps.AppBase
         PlottingStatusLamp              matlab.ui.control.Lamp
         LengthofsquaresidesSliderLabel  matlab.ui.control.Label
         LengthofsquaresidesSlider       matlab.ui.control.Slider
+        WarningSquarelengthPlankdistanceLabel  matlab.ui.control.Label
         UIControlsTab                   matlab.ui.container.Tab
         FontSizeSliderLabel             matlab.ui.control.Label
         FontSizeSlider                  matlab.ui.control.Slider
@@ -73,13 +74,19 @@ classdef basic_exported < matlab.apps.AppBase
 		function updatePlankCount(app, plankCount)
 			app.NoP = plankCount;
 			app.D =	app.S / app.NoP;
-			app.SL = app.D / 4;
+			%app.SL = app.D / 4;
+            makeWarningForLgtD(app);
 			
 			updateSquarePlot(app);
         end
         
         function makeWarningForLgtD(app)
             % Show error if  L > D
+            if app.SL > app.D
+                set(app.WarningSquarelengthPlankdistanceLabel, 'Visible', true);
+            else
+                set(app.WarningSquarelengthPlankdistanceLabel, 'Visible', false);
+            end
         end
         
 		function updateSquareCount(app, squareCount)
@@ -89,6 +96,7 @@ classdef basic_exported < matlab.apps.AppBase
         
         function updateSquareLength(app, squareLength)
 			app.SL = squareLength;
+            makeWarningForLgtD(app);
 			updateSquarePlot(app);
 		end
 		
@@ -195,8 +203,8 @@ classdef basic_exported < matlab.apps.AppBase
             value = app.NumberoffloorplanksSlider.Value;
             
             % Snap to nearest value
-            minVal = min(abs(value));
-			event.Source.Value = minVal;
+            [~, minVal] = min(abs(value - event.Source.MajorTicks(:)));
+			event.Source.Value = event.Source.MajorTicks(minVal);
 			
 			updatePlankCount(app, minVal);
         end
@@ -384,6 +392,13 @@ classdef basic_exported < matlab.apps.AppBase
             app.LengthofsquaresidesSlider.MinorTicks = [];
             app.LengthofsquaresidesSlider.Position = [28 195 204 7];
             app.LengthofsquaresidesSlider.Value = 1;
+
+            % Create WarningSquarelengthPlankdistanceLabel
+            app.WarningSquarelengthPlankdistanceLabel = uilabel(app.PlotControlsTab);
+            app.WarningSquarelengthPlankdistanceLabel.FontColor = [1 0 0];
+            app.WarningSquarelengthPlankdistanceLabel.Visible = 'off';
+            app.WarningSquarelengthPlankdistanceLabel.Position = [22 135 228 22];
+            app.WarningSquarelengthPlankdistanceLabel.Text = 'Warning! Square length > Plank distance ';
 
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
