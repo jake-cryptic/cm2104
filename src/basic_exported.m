@@ -278,7 +278,7 @@ classdef basic_exported < matlab.apps.AppBase
                 app.calc = 2;
             end
             
-            %updateSquarePlot(app);
+            updateSquarePlot(app);
         end
 
         % Value changed function: NumberofhorizontalplanksSlider
