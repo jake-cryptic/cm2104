@@ -37,6 +37,8 @@ classdef basic_exported < matlab.apps.AppBase
         ModifySquareColourButton_2      matlab.ui.control.Button
         CurrentLampLabel_3              matlab.ui.control.Label
         CurrentFontColorLamp_3          matlab.ui.control.Lamp
+        SwitchLabel                     matlab.ui.control.Label
+        AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch  matlab.ui.control.Switch
         c1931370Label                   matlab.ui.control.Label
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
@@ -44,9 +46,10 @@ classdef basic_exported < matlab.apps.AppBase
 
     
     properties (Access = private)
-		S	=	1					% Scale factor
-        N	=	1000				% Number of needles
-		NoP	=	5					% Number of planks
+		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
+        S	    =	1					% Scale factor
+        N	    =	1000				% Number of needles
+		NoP	    =	5					% Number of planks
 		D							% Distance between planks
 		SL							% Length of square side
 		
@@ -116,7 +119,11 @@ classdef basic_exported < matlab.apps.AppBase
 				rad * sind(app.sq_angles) + rad * cosd(app.sq_angles) + app.yc;...
 			];
 			
-			calculateSquarePi(app);
+            if app.calc == 1
+			    calculateSquarePi(app);
+            else
+                calculateSquareSqrtTwo(app);
+            end
 			
 			app.p = patch(app.UIAxes, app.xcr, app.ycr, 'red');
 		end
@@ -137,6 +144,24 @@ classdef basic_exported < matlab.apps.AppBase
 			
 			pi_estimate = t / (n * app.D);
 			UIUpdateOutEstimate(app, ['Pi Estimate: ' num2str(pi_estimate)]);
+		end
+		
+		function calculateSquareSqrtTwo(app)
+			n = 0;
+			n = n + sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)) + ...
+					sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) + ...
+					sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)) + ...
+					sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
+            
+			t = 2 * (app.N * 4) * app.SL;
+            
+%             disp(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D));
+%             disp(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D));
+%             disp(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D));
+%             disp(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
+			
+			rt_estimate = t / (n * app.D);
+			UIUpdateOutEstimate(app, ['Sqrt(2) Estimate: ' num2str(rt_estimate)]);
 		end
 		
 		function UIUpdateOutEstimate(app, value)
@@ -219,6 +244,17 @@ classdef basic_exported < matlab.apps.AppBase
             
             set(app.OutEstimateLabel, 'FontColor', c);
         end
+
+        % Selection changed function: EstimatevalueofButtonGroup
+        function EstimatevalueofButtonGroupSelectionChanged(app, event)
+            selectedButton = app.EstimatevalueofButtonGroup.SelectedObject;
+            
+            if strcmp(selectedButton.Text,'π - "pi"')
+                app.calc = 1;
+            else
+                app.calc = 2;
+            end
+        end
     end
 
     % Component initialization
@@ -294,6 +330,7 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create EstimatevalueofButtonGroup
             app.EstimatevalueofButtonGroup = uibuttongroup(app.PlotControlsTab);
+            app.EstimatevalueofButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @EstimatevalueofButtonGroupSelectionChanged, true);
             app.EstimatevalueofButtonGroup.Title = 'Estimate value of...';
             app.EstimatevalueofButtonGroup.Position = [5 383 121 95];
 
@@ -432,6 +469,17 @@ classdef basic_exported < matlab.apps.AppBase
             app.CurrentFontColorLamp_3 = uilamp(app.UIControlsTab);
             app.CurrentFontColorLamp_3.Position = [225 194 25 25];
             app.CurrentFontColorLamp_3.Color = [0 0 0];
+
+            % Create SwitchLabel
+            app.SwitchLabel = uilabel(app.UIControlsTab);
+            app.SwitchLabel.HorizontalAlignment = 'center';
+            app.SwitchLabel.WordWrap = 'on';
+            app.SwitchLabel.Position = [75 136 194 50];
+            app.SwitchLabel.Text = 'Automatically re-run simulation when an important value changes';
+
+            % Create AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch
+            app.AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch = uiswitch(app.UIControlsTab, 'slider');
+            app.AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch.Position = [33 156 23 10];
 
             % Create c1931370Label
             app.c1931370Label = uilabel(app.UIFigure);
