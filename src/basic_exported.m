@@ -49,7 +49,7 @@ classdef basic_exported < matlab.apps.AppBase
     properties (Access = private)
 		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
         S	    =	1					% Scale factor
-        N	    =	1000				% Number of needles
+        N	    =	2				% Number of needles
 		NoP	    =	5					% Number of planks
 		D							% Distance between planks
 		SL							% Length of square side
@@ -154,20 +154,36 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function calculateSquareSqrtTwo(app)
-			n = 0;
-			n = n + sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)) + ...
-					sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) + ...
-					sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)) + ...
-					sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
+            n = sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D) | floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D) |...
+                floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D) | floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D))
             
-			t = 2 * (app.N * 4) * app.SL;
-            
+%             disp('New one:')
+            % 1,2 - 4,1 : 2,3 - 3,4
+            %top
 %             disp(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D));
+%             disp(sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)));
+%             %left
 %             disp(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D));
+%             disp(sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)));
+%             %bottom
 %             disp(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D));
+%             disp(sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)));
+%             % Right
 %             disp(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
+%             disp(sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)));
+%             
+%             disp('Total crossing at diag:');
+%             disp(sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)) && sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)));
+%             disp(sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) && sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)));
+%             disp(sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)) && sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)));
+%             disp(sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)) && sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)));
+            
+            nn = 0;
+            nn = nn + sum((floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) & (floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D))) + ...
+                sum((floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)) & (floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)))
+            nnn = nn/n
 			
-			rt_estimate = t / (n * app.D);
+			rt_estimate = 2 - nnn;
 			UIUpdateOutEstimate(app, ['Sqrt(2) Estimate: ' num2str(rt_estimate)]);
 		end
 		
@@ -177,7 +193,7 @@ classdef basic_exported < matlab.apps.AppBase
 		
 		function updatePlotFloor(app)
 			for i = 0:app.D:app.S
-				xline(app.UIAxes, i,  '-', 'LineWidth', 2);
+				xline(app.UIAxes, i,  '-', 'LineWidth', 1);
 			end
 		end
 	end
@@ -406,7 +422,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create FontSizeSliderLabel
             app.FontSizeSliderLabel = uilabel(app.UIControlsTab);
             app.FontSizeSliderLabel.HorizontalAlignment = 'right';
-            app.FontSizeSliderLabel.Position = [105 419 56 22];
+            app.FontSizeSliderLabel.Position = [47 428 56 22];
             app.FontSizeSliderLabel.Text = 'Font Size';
 
             % Create FontSizeSlider
@@ -416,29 +432,29 @@ classdef basic_exported < matlab.apps.AppBase
             app.FontSizeSlider.MajorTickLabels = {'XS', 'S', 'M', 'L', 'XL'};
             app.FontSizeSlider.ValueChangedFcn = createCallbackFcn(app, @FontSizeSliderValueChanged, true);
             app.FontSizeSlider.MinorTicks = [];
-            app.FontSizeSlider.Position = [19 409 228 7];
+            app.FontSizeSlider.Position = [19 418 112 7];
             app.FontSizeSlider.Value = 14;
 
             % Create ModifyFontColourButton
             app.ModifyFontColourButton = uibutton(app.UIControlsTab, 'push');
             app.ModifyFontColourButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyFontColourButtonPushed, true);
-            app.ModifyFontColourButton.Position = [16 330 137 22];
+            app.ModifyFontColourButton.Position = [11 347 137 22];
             app.ModifyFontColourButton.Text = 'Modify Font Colour';
 
             % Create CurrentLampLabel
             app.CurrentLampLabel = uilabel(app.UIControlsTab);
             app.CurrentLampLabel.HorizontalAlignment = 'right';
-            app.CurrentLampLabel.Position = [167 329 48 22];
+            app.CurrentLampLabel.Position = [166 346 48 22];
             app.CurrentLampLabel.Text = 'Current:';
 
             % Create CurrentFontColorLamp
             app.CurrentFontColorLamp = uilamp(app.UIControlsTab);
-            app.CurrentFontColorLamp.Position = [225 329 25 25];
+            app.CurrentFontColorLamp.Position = [224 346 25 25];
             app.CurrentFontColorLamp.Color = [0 0 0];
 
             % Create ModifyhowtheestimateisdisplayedLabel
             app.ModifyhowtheestimateisdisplayedLabel = uilabel(app.UIControlsTab);
-            app.ModifyhowtheestimateisdisplayedLabel.Position = [36 444 201 22];
+            app.ModifyhowtheestimateisdisplayedLabel.Position = [8 456 201 22];
             app.ModifyhowtheestimateisdisplayedLabel.Text = 'Modify how the estimate is displayed';
 
             % Create GridLineThicknessSpinnerLabel
@@ -460,7 +476,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create CurrentLampLabel_2
             app.CurrentLampLabel_2 = uilabel(app.UIControlsTab);
             app.CurrentLampLabel_2.HorizontalAlignment = 'right';
-            app.CurrentLampLabel_2.Position = [166 235 48 22];
+            app.CurrentLampLabel_2.Position = [168 236 48 22];
             app.CurrentLampLabel_2.Text = 'Current:';
 
             % Create CurrentFontColorLamp_2
@@ -488,12 +504,12 @@ classdef basic_exported < matlab.apps.AppBase
             app.SwitchLabel = uilabel(app.UIControlsTab);
             app.SwitchLabel.HorizontalAlignment = 'center';
             app.SwitchLabel.WordWrap = 'on';
-            app.SwitchLabel.Position = [75 136 194 50];
+            app.SwitchLabel.Position = [82 136 194 50];
             app.SwitchLabel.Text = 'Automatically re-run simulation when an important value changes';
 
             % Create AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch
             app.AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch = uiswitch(app.UIControlsTab, 'slider');
-            app.AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch.Position = [33 156 23 10];
+            app.AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch.Position = [40 156 23 10];
 
             % Create c1931370Label
             app.c1931370Label = uilabel(app.UIFigure);
