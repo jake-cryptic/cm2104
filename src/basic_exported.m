@@ -64,22 +64,34 @@ classdef basic_exported < matlab.apps.AppBase
         
         % Custom variables
         uiGridlineWidth =   1
+        currentTask = 1
 		
 		% Patch object
-		p
+		pat
+        plt
 		
-		% State
+		% State variables
 		sq_angles
 		xc
 		yc
 		xcr
 		ycr
+        
+		n_angles
+		nxc
+		nyc
+		nxcr
+		nycr
     end
     
     methods (Access = private)
         
 		function beginEstimation(app)
-			updateSquarePlot(app);
+            if app.currentTask == 1 || app.currentTask == 2
+			    updateSquarePlot(app);
+            else
+                updateNeedlePlot(app);
+            end
         end
 		
 		function updatePlankCount(app, plankCount)
@@ -94,8 +106,6 @@ classdef basic_exported < matlab.apps.AppBase
 			app.NoVP = plankCount;
 			app.DH = app.S / app.NoVP;
             makeWarningForLgtD(app);
-			
-            set(app.UsegridSwitch, 'Value', 'On');
             
 			beginEstimation(app);
         end
@@ -117,6 +127,26 @@ classdef basic_exported < matlab.apps.AppBase
 			app.SL = itemLength;
             makeWarningForLgtD(app);
 			beginEstimation(app);
+        end
+        
+        function updateNeedleRanomisation(app)
+			app.n_angles = rand(1, app.N) * 360;
+			app.nxc = rand(1, app.N);
+			app.nyc = rand(1, app.N);
+		end
+		
+		function updateNeedlePlot(app)
+			UIDoClearAxes(app);
+			updateNeedleRanomisation(app);
+			updatePlotFloor(app);
+			updatePlotGrid(app);
+			
+			app.nxcr = app.nxc + app.SL * cosd(app.n_angles);
+			app.nycr = app.nxc + app.SL * sind(app.n_angles);
+			
+			calculateNeedlePi(app);
+			
+            app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2);
 		end
 		
 		function updateSquareRanomisation(app)
@@ -129,7 +159,6 @@ classdef basic_exported < matlab.apps.AppBase
 			UIDoClearAxes(app);
 			updateSquareRanomisation(app);
 			updatePlotFloor(app);
-			updatePlotGrid(app);
 			
             rad = app.SL / 2;
 			app.xcr = [...
@@ -151,7 +180,17 @@ classdef basic_exported < matlab.apps.AppBase
                 calculateSquareSqrtTwo(app);
             end
 			
-			app.p = patch(app.UIAxes, app.xcr, app.ycr, 'red');
+			app.pat = patch(app.UIAxes, app.xcr, app.ycr, 'red');
+		end
+		
+		function calculateNeedlePi(app)
+			n = 0;
+			n = n + sum(floor(app.nxc / app.SL) ~= floor(app.nxcr / app.SL));
+            
+			t = 2 * app.N * app.SL;
+			
+			pi_estimate = t / (n * app.DV);
+			UIUpdateOutEstimate(app, ['Needle Pi Estimate: ' num2str(pi_estimate)]);
 		end
 		
 		function calculateSquarePi(app)
@@ -165,7 +204,7 @@ classdef basic_exported < matlab.apps.AppBase
 			
 			pi_estimate = t / (n * app.DV);
 			UIUpdateOutEstimate(app, ['Pi Estimate: ' num2str(pi_estimate)]);
-		end
+        end
 		
 		function calculateSquareSqrtTwo(app)
             total_intersected = sum(floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
@@ -188,6 +227,20 @@ classdef basic_exported < matlab.apps.AppBase
         function UIDoClearAxes(app)
 			cla(app.UIAxes, 'reset');
 			axis(app.UIAxes, [0 1.0 0 1.0]);
+        end
+        
+        function UIUpdateCurrentTask(app, newTaskNo)
+            if newTaskNo == 1
+                
+            end
+            if newTaskNo == 2
+                
+            end
+            if newTaskNo == 3
+                
+            end
+            
+            app.currentTask = newTaskNo;
         end
 		
 		function updatePlotFloor(app)
@@ -303,6 +356,12 @@ classdef basic_exported < matlab.apps.AppBase
             app.uiGridlineWidth = value;
             
             beginEstimation(app);
+        end
+
+        % Selection changed function: SelectTaskButtonGroup
+        function SelectTaskButtonGroupSelectionChanged(app, event)
+            selectedButton = app.SelectTaskButtonGroup.SelectedObject;
+            UIUpdateCurrentTask(app, str2num(selectedButton.Text));
         end
     end
 
@@ -459,6 +518,7 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create SelectTaskButtonGroup
             app.SelectTaskButtonGroup = uibuttongroup(app.PlotControlsTab);
+            app.SelectTaskButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @SelectTaskButtonGroupSelectionChanged, true);
             app.SelectTaskButtonGroup.Title = 'Select Task';
             app.SelectTaskButtonGroup.Position = [23 433 255 50];
 
