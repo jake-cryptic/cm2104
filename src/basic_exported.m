@@ -25,8 +25,10 @@ classdef basic_exported < matlab.apps.AppBase
         WarningSquarelengthPlankdistanceLabel  matlab.ui.control.Label
         NumberofhorizontalplanksSliderLabel  matlab.ui.control.Label
         NumberofhorizontalplanksSlider  matlab.ui.control.Slider
-        UsegridSwitchLabel              matlab.ui.control.Label
-        UsegridSwitch                   matlab.ui.control.Switch
+        SelectTaskButtonGroup           matlab.ui.container.ButtonGroup
+        Button                          matlab.ui.control.ToggleButton
+        Button_2                        matlab.ui.control.ToggleButton
+        Button_3                        matlab.ui.control.ToggleButton
         UIControlsTab                   matlab.ui.container.Tab
         FontSizeSliderLabel             matlab.ui.control.Label
         FontSizeSlider                  matlab.ui.control.Slider
@@ -326,7 +328,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create EstimatevalueusingButtonGroup
             app.EstimatevalueusingButtonGroup = uibuttongroup(app.PlotControlsTab);
             app.EstimatevalueusingButtonGroup.Title = 'Estimate value using...';
-            app.EstimatevalueusingButtonGroup.Position = [151 383 147 95];
+            app.EstimatevalueusingButtonGroup.Position = [152 333 147 95];
 
             % Create SquaresButton
             app.SquaresButton = uiradiobutton(app.EstimatevalueusingButtonGroup);
@@ -348,7 +350,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create NumberofsquaresSpinnerLabel
             app.NumberofsquaresSpinnerLabel = uilabel(app.PlotControlsTab);
             app.NumberofsquaresSpinnerLabel.HorizontalAlignment = 'right';
-            app.NumberofsquaresSpinnerLabel.Position = [152 358 117 22];
+            app.NumberofsquaresSpinnerLabel.Position = [152 303 117 22];
             app.NumberofsquaresSpinnerLabel.Text = 'Number of squares...';
 
             % Create NumberofsquaresSpinner
@@ -356,13 +358,13 @@ classdef basic_exported < matlab.apps.AppBase
             app.NumberofsquaresSpinner.Limits = [1 10000000];
             app.NumberofsquaresSpinner.ValueChangedFcn = createCallbackFcn(app, @NumberofsquaresSpinnerValueChanged, true);
             app.NumberofsquaresSpinner.HorizontalAlignment = 'left';
-            app.NumberofsquaresSpinner.Position = [156 337 142 22];
+            app.NumberofsquaresSpinner.Position = [156 282 142 22];
             app.NumberofsquaresSpinner.Value = 1000;
 
             % Create NumberoffloorplanksSliderLabel
             app.NumberoffloorplanksSliderLabel = uilabel(app.PlotControlsTab);
             app.NumberoffloorplanksSliderLabel.HorizontalAlignment = 'right';
-            app.NumberoffloorplanksSliderLabel.Position = [2 358 136 22];
+            app.NumberoffloorplanksSliderLabel.Position = [6 303 136 22];
             app.NumberoffloorplanksSliderLabel.Text = 'Number of floor planks...';
 
             % Create NumberoffloorplanksSlider
@@ -372,14 +374,14 @@ classdef basic_exported < matlab.apps.AppBase
             app.NumberoffloorplanksSlider.MajorTickLabels = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10'};
             app.NumberoffloorplanksSlider.ValueChangedFcn = createCallbackFcn(app, @NumberoffloorplanksSliderValueChanged, true);
             app.NumberoffloorplanksSlider.MinorTicks = [];
-            app.NumberoffloorplanksSlider.Position = [8 347 136 7];
+            app.NumberoffloorplanksSlider.Position = [10 293 136 7];
             app.NumberoffloorplanksSlider.Value = 5;
 
             % Create EstimatevalueofButtonGroup
             app.EstimatevalueofButtonGroup = uibuttongroup(app.PlotControlsTab);
             app.EstimatevalueofButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @EstimatevalueofButtonGroupSelectionChanged, true);
             app.EstimatevalueofButtonGroup.Title = 'Estimate value of...';
-            app.EstimatevalueofButtonGroup.Position = [5 383 143 95];
+            app.EstimatevalueofButtonGroup.Position = [7 334 141 95];
 
             % Create piButton
             app.piButton = uiradiobutton(app.EstimatevalueofButtonGroup);
@@ -396,30 +398,30 @@ classdef basic_exported < matlab.apps.AppBase
             app.goldenratioButton = uiradiobutton(app.EstimatevalueofButtonGroup);
             app.goldenratioButton.Visible = 'off';
             app.goldenratioButton.Text = 'ϕ - "golden ratio"';
-            app.goldenratioButton.Position = [11 5 110 22];
+            app.goldenratioButton.Position = [10 1 110 22];
 
             % Create EstimateButton
             app.EstimateButton = uibutton(app.PlotControlsTab, 'push');
             app.EstimateButton.ButtonPushedFcn = createCallbackFcn(app, @EstimateButtonPushed, true);
             app.EstimateButton.Interruptible = 'off';
             app.EstimateButton.FontSize = 18;
-            app.EstimateButton.Position = [90 49 100 29];
+            app.EstimateButton.Position = [97 49 100 29];
             app.EstimateButton.Text = 'Estimate';
 
             % Create PlottingStatusLampLabel
             app.PlottingStatusLampLabel = uilabel(app.PlotControlsTab);
             app.PlottingStatusLampLabel.HorizontalAlignment = 'right';
-            app.PlottingStatusLampLabel.Position = [84 16 83 22];
+            app.PlottingStatusLampLabel.Position = [174 215 83 22];
             app.PlottingStatusLampLabel.Text = 'Plotting Status';
 
             % Create PlottingStatusLamp
             app.PlottingStatusLamp = uilamp(app.PlotControlsTab);
-            app.PlottingStatusLamp.Position = [176 17 20 20];
+            app.PlottingStatusLamp.Position = [266 216 20 20];
 
             % Create LengthofsquaresidesSliderLabel
             app.LengthofsquaresidesSliderLabel = uilabel(app.PlotControlsTab);
             app.LengthofsquaresidesSliderLabel.HorizontalAlignment = 'right';
-            app.LengthofsquaresidesSliderLabel.Position = [36 194 130 22];
+            app.LengthofsquaresidesSliderLabel.Position = [6 166 130 22];
             app.LengthofsquaresidesSliderLabel.Text = 'Length of square sides:';
 
             % Create LengthofsquaresidesSlider
@@ -429,20 +431,20 @@ classdef basic_exported < matlab.apps.AppBase
             app.LengthofsquaresidesSlider.MajorTickLabels = {'0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'};
             app.LengthofsquaresidesSlider.ValueChangedFcn = createCallbackFcn(app, @LengthofsquaresidesSliderValueChanged, true);
             app.LengthofsquaresidesSlider.MinorTicks = [];
-            app.LengthofsquaresidesSlider.Position = [45 183 204 7];
+            app.LengthofsquaresidesSlider.Position = [15 155 267 7];
             app.LengthofsquaresidesSlider.Value = 1;
 
             % Create WarningSquarelengthPlankdistanceLabel
             app.WarningSquarelengthPlankdistanceLabel = uilabel(app.PlotControlsTab);
             app.WarningSquarelengthPlankdistanceLabel.FontColor = [1 0 0];
             app.WarningSquarelengthPlankdistanceLabel.Visible = 'off';
-            app.WarningSquarelengthPlankdistanceLabel.Position = [37 115 228 22];
+            app.WarningSquarelengthPlankdistanceLabel.Position = [38 87 228 22];
             app.WarningSquarelengthPlankdistanceLabel.Text = 'Warning! Square length > Plank distance ';
 
             % Create NumberofhorizontalplanksSliderLabel
             app.NumberofhorizontalplanksSliderLabel = uilabel(app.PlotControlsTab);
             app.NumberofhorizontalplanksSliderLabel.HorizontalAlignment = 'right';
-            app.NumberofhorizontalplanksSliderLabel.Position = [2 293 155 22];
+            app.NumberofhorizontalplanksSliderLabel.Position = [3 236 155 22];
             app.NumberofhorizontalplanksSliderLabel.Text = 'Number of horizontal planks';
 
             % Create NumberofhorizontalplanksSlider
@@ -452,18 +454,29 @@ classdef basic_exported < matlab.apps.AppBase
             app.NumberofhorizontalplanksSlider.MajorTickLabels = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10'};
             app.NumberofhorizontalplanksSlider.ValueChangedFcn = createCallbackFcn(app, @NumberofhorizontalplanksSliderValueChanged, true);
             app.NumberofhorizontalplanksSlider.MinorTicks = [];
-            app.NumberofhorizontalplanksSlider.Position = [8 282 135 7];
+            app.NumberofhorizontalplanksSlider.Position = [10 225 135 7];
             app.NumberofhorizontalplanksSlider.Value = 5;
 
-            % Create UsegridSwitchLabel
-            app.UsegridSwitchLabel = uilabel(app.PlotControlsTab);
-            app.UsegridSwitchLabel.HorizontalAlignment = 'center';
-            app.UsegridSwitchLabel.Position = [198 257 50 22];
-            app.UsegridSwitchLabel.Text = 'Use grid';
+            % Create SelectTaskButtonGroup
+            app.SelectTaskButtonGroup = uibuttongroup(app.PlotControlsTab);
+            app.SelectTaskButtonGroup.Title = 'Select Task';
+            app.SelectTaskButtonGroup.Position = [23 433 255 50];
 
-            % Create UsegridSwitch
-            app.UsegridSwitch = uiswitch(app.PlotControlsTab, 'slider');
-            app.UsegridSwitch.Position = [198 289 45 20];
+            % Create Button
+            app.Button = uitogglebutton(app.SelectTaskButtonGroup);
+            app.Button.Text = '1';
+            app.Button.Position = [13 5 54 22];
+            app.Button.Value = true;
+
+            % Create Button_2
+            app.Button_2 = uitogglebutton(app.SelectTaskButtonGroup);
+            app.Button_2.Text = '2';
+            app.Button_2.Position = [103 5 49 22];
+
+            % Create Button_3
+            app.Button_3 = uitogglebutton(app.SelectTaskButtonGroup);
+            app.Button_3.Text = '3';
+            app.Button_3.Position = [190 5 51 22];
 
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
