@@ -74,7 +74,6 @@ classdef basic_exported < matlab.apps.AppBase
 		function updatePlankCount(app, plankCount)
 			app.NoP = plankCount;
 			app.D =	app.S / app.NoP;
-			%app.SL = app.D / 4;
             makeWarningForLgtD(app);
 			
 			updateSquarePlot(app);
@@ -273,12 +272,12 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create UIFigure and hide until all components are created
             app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Position = [100 100 803 518];
+            app.UIFigure.Position = [100 100 840 518];
             app.UIFigure.Name = 'MATLAB App';
 
             % Create TabGroup
             app.TabGroup = uitabgroup(app.UIFigure);
-            app.TabGroup.Position = [1 1 264 518];
+            app.TabGroup.Position = [1 1 301 518];
 
             % Create PlotControlsTab
             app.PlotControlsTab = uitab(app.TabGroup);
@@ -287,7 +286,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create EstimatevalueusingButtonGroup
             app.EstimatevalueusingButtonGroup = uibuttongroup(app.PlotControlsTab);
             app.EstimatevalueusingButtonGroup.Title = 'Estimate value using...';
-            app.EstimatevalueusingButtonGroup.Position = [127 383 132 95];
+            app.EstimatevalueusingButtonGroup.Position = [151 383 147 95];
 
             % Create SquaresButton
             app.SquaresButton = uiradiobutton(app.EstimatevalueusingButtonGroup);
@@ -309,7 +308,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create NumberofsquaresSpinnerLabel
             app.NumberofsquaresSpinnerLabel = uilabel(app.PlotControlsTab);
             app.NumberofsquaresSpinnerLabel.HorizontalAlignment = 'right';
-            app.NumberofsquaresSpinnerLabel.Position = [42 341 117 22];
+            app.NumberofsquaresSpinnerLabel.Position = [152 358 117 22];
             app.NumberofsquaresSpinnerLabel.Text = 'Number of squares...';
 
             % Create NumberofsquaresSpinner
@@ -317,13 +316,13 @@ classdef basic_exported < matlab.apps.AppBase
             app.NumberofsquaresSpinner.Limits = [1 10000000];
             app.NumberofsquaresSpinner.ValueChangedFcn = createCallbackFcn(app, @NumberofsquaresSpinnerValueChanged, true);
             app.NumberofsquaresSpinner.HorizontalAlignment = 'left';
-            app.NumberofsquaresSpinner.Position = [42 320 169 22];
+            app.NumberofsquaresSpinner.Position = [156 337 142 22];
             app.NumberofsquaresSpinner.Value = 1000;
 
             % Create NumberoffloorplanksSliderLabel
             app.NumberoffloorplanksSliderLabel = uilabel(app.PlotControlsTab);
             app.NumberoffloorplanksSliderLabel.HorizontalAlignment = 'right';
-            app.NumberoffloorplanksSliderLabel.Position = [22 283 136 22];
+            app.NumberoffloorplanksSliderLabel.Position = [2 358 136 22];
             app.NumberoffloorplanksSliderLabel.Text = 'Number of floor planks...';
 
             % Create NumberoffloorplanksSlider
@@ -333,14 +332,14 @@ classdef basic_exported < matlab.apps.AppBase
             app.NumberoffloorplanksSlider.MajorTickLabels = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10'};
             app.NumberoffloorplanksSlider.ValueChangedFcn = createCallbackFcn(app, @NumberoffloorplanksSliderValueChanged, true);
             app.NumberoffloorplanksSlider.MinorTicks = [];
-            app.NumberoffloorplanksSlider.Position = [28 272 204 7];
+            app.NumberoffloorplanksSlider.Position = [8 347 136 7];
             app.NumberoffloorplanksSlider.Value = 5;
 
             % Create EstimatevalueofButtonGroup
             app.EstimatevalueofButtonGroup = uibuttongroup(app.PlotControlsTab);
             app.EstimatevalueofButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @EstimatevalueofButtonGroupSelectionChanged, true);
             app.EstimatevalueofButtonGroup.Title = 'Estimate value of...';
-            app.EstimatevalueofButtonGroup.Position = [5 383 121 95];
+            app.EstimatevalueofButtonGroup.Position = [5 383 143 95];
 
             % Create piButton
             app.piButton = uiradiobutton(app.EstimatevalueofButtonGroup);
@@ -364,23 +363,23 @@ classdef basic_exported < matlab.apps.AppBase
             app.EstimateButton.ButtonPushedFcn = createCallbackFcn(app, @EstimateButtonPushed, true);
             app.EstimateButton.Interruptible = 'off';
             app.EstimateButton.FontSize = 18;
-            app.EstimateButton.Position = [81 49 100 29];
+            app.EstimateButton.Position = [90 49 100 29];
             app.EstimateButton.Text = 'Estimate';
 
             % Create PlottingStatusLampLabel
             app.PlottingStatusLampLabel = uilabel(app.PlotControlsTab);
             app.PlottingStatusLampLabel.HorizontalAlignment = 'right';
-            app.PlottingStatusLampLabel.Position = [77 16 83 22];
+            app.PlottingStatusLampLabel.Position = [84 16 83 22];
             app.PlottingStatusLampLabel.Text = 'Plotting Status';
 
             % Create PlottingStatusLamp
             app.PlottingStatusLamp = uilamp(app.PlotControlsTab);
-            app.PlottingStatusLamp.Position = [169 17 20 20];
+            app.PlottingStatusLamp.Position = [176 17 20 20];
 
             % Create LengthofsquaresidesSliderLabel
             app.LengthofsquaresidesSliderLabel = uilabel(app.PlotControlsTab);
             app.LengthofsquaresidesSliderLabel.HorizontalAlignment = 'right';
-            app.LengthofsquaresidesSliderLabel.Position = [19 206 130 22];
+            app.LengthofsquaresidesSliderLabel.Position = [36 194 130 22];
             app.LengthofsquaresidesSliderLabel.Text = 'Length of square sides:';
 
             % Create LengthofsquaresidesSlider
@@ -390,14 +389,14 @@ classdef basic_exported < matlab.apps.AppBase
             app.LengthofsquaresidesSlider.MajorTickLabels = {'0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'};
             app.LengthofsquaresidesSlider.ValueChangedFcn = createCallbackFcn(app, @LengthofsquaresidesSliderValueChanged, true);
             app.LengthofsquaresidesSlider.MinorTicks = [];
-            app.LengthofsquaresidesSlider.Position = [28 195 204 7];
+            app.LengthofsquaresidesSlider.Position = [45 183 204 7];
             app.LengthofsquaresidesSlider.Value = 1;
 
             % Create WarningSquarelengthPlankdistanceLabel
             app.WarningSquarelengthPlankdistanceLabel = uilabel(app.PlotControlsTab);
             app.WarningSquarelengthPlankdistanceLabel.FontColor = [1 0 0];
             app.WarningSquarelengthPlankdistanceLabel.Visible = 'off';
-            app.WarningSquarelengthPlankdistanceLabel.Position = [22 135 228 22];
+            app.WarningSquarelengthPlankdistanceLabel.Position = [37 115 228 22];
             app.WarningSquarelengthPlankdistanceLabel.Text = 'Warning! Square length > Plank distance ';
 
             % Create UIControlsTab
@@ -504,7 +503,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.UIFigure);
             app.OutEstimateLabel.FontSize = 16;
-            app.OutEstimateLabel.Position = [302 29 228 22];
+            app.OutEstimateLabel.Position = [307 29 228 22];
             app.OutEstimateLabel.Text = 'Pi Estimate: N/A';
 
             % Create UIAxes
@@ -513,7 +512,7 @@ classdef basic_exported < matlab.apps.AppBase
             xlabel(app.UIAxes, 'X')
             ylabel(app.UIAxes, 'Y')
             app.UIAxes.XTick = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
-            app.UIAxes.Position = [264 50 540 469];
+            app.UIAxes.Position = [301 50 540 469];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
