@@ -53,12 +53,12 @@ classdef basic_exported < matlab.apps.AppBase
     properties (Access = private)
 		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
         S	    =	1					% Scale factor
-        N	    =	2000			    % Number of needles
+        N	    =	2000			    % Number of shapes
 		NoVP	=	5				    % Number of planks
         NoHP    =   5                   % Number of horizontal planks
 		DV							    % Distance between vertical planks
 		DH							    % Distance between horizontal planks
-		SL							    % Length of square side
+		SL							    % Length of shape
         
         % Custom variables
         uiGridlineWidth =   1
@@ -78,14 +78,14 @@ classdef basic_exported < matlab.apps.AppBase
         
 		function beginEstimation(app)
 			updateSquarePlot(app);
-		end
+        end
 		
 		function updatePlankCount(app, plankCount)
 			app.NoVP = plankCount;
 			app.DV = app.S / app.NoVP;
             makeWarningForLgtD(app);
 			
-			updateSquarePlot(app);
+			beginEstimation(app);
         end
 		
         function updateHorizontalPlankCount(app, plankCount)
@@ -95,7 +95,7 @@ classdef basic_exported < matlab.apps.AppBase
 			
             set(app.UsegridSwitch, 'Value', 'On');
             
-			updateSquarePlot(app);
+			beginEstimation(app);
         end
         
         function makeWarningForLgtD(app)
@@ -106,15 +106,15 @@ classdef basic_exported < matlab.apps.AppBase
             end
         end
         
-		function updateSquareCount(app, squareCount)
+		function updateItemCount(app, squareCount)
 			app.N = squareCount;
-			updateSquarePlot(app);
+			beginEstimation(app);
 		end
         
-        function updateSquareLength(app, squareLength)
-			app.SL = squareLength;
+        function updateItemLength(app, itemLength)
+			app.SL = itemLength;
             makeWarningForLgtD(app);
-			updateSquarePlot(app);
+			beginEstimation(app);
 		end
 		
 		function updateSquareRanomisation(app)
@@ -124,9 +124,7 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function updateSquarePlot(app)
-			cla(app.UIAxes, 'reset');
-			axis(app.UIAxes, [0 1.0 0 1.0]);
-			
+			UIDoClearAxes(app);
 			updateSquareRanomisation(app);
 			updatePlotFloor(app);
 			updatePlotGrid(app);
@@ -183,7 +181,12 @@ classdef basic_exported < matlab.apps.AppBase
 		
 		function UIUpdateOutEstimate(app, value)
 			set(app.OutEstimateLabel, 'Text', value);
-		end
+        end
+        
+        function UIDoClearAxes(app)
+			cla(app.UIAxes, 'reset');
+			axis(app.UIAxes, [0 1.0 0 1.0]);
+        end
 		
 		function updatePlotFloor(app)
 			for i = 0:app.DV:app.S
@@ -210,7 +213,7 @@ classdef basic_exported < matlab.apps.AppBase
         % Value changed function: NumberofsquaresSpinner
         function NumberofsquaresSpinnerValueChanged(app, event)
             value = ceil(app.NumberofsquaresSpinner.Value);
-            updateSquareCount(app, value);
+            updateItemCount(app, value);
         end
 
         % Value changed function: NumberoffloorplanksSlider
@@ -228,7 +231,7 @@ classdef basic_exported < matlab.apps.AppBase
         function EstimateButtonPushed(app, event)
 			set(app.PlottingStatusLamp, 'Color', '#f00');
 			beginEstimation(app);
-			%set(app.PlottingStatusLamp, 'Color', '#0f0');
+			set(app.PlottingStatusLamp, 'Color', '#0f0');
         end
 
         % Button pushed function: ModifyFontColourButton
@@ -258,7 +261,7 @@ classdef basic_exported < matlab.apps.AppBase
             [~, minVal] = min(abs(value - event.Source.MajorTicks(:)));
 			event.Source.Value = event.Source.MajorTicks(minVal);
             
-			updateSquareLength(app, minVal / 10);
+			updateItemLength(app, minVal / 10);
         end
 
         % Button pushed function: ModifyGridLineColorButton
@@ -278,7 +281,7 @@ classdef basic_exported < matlab.apps.AppBase
                 app.calc = 2;
             end
             
-            updateSquarePlot(app);
+            beginEstimation(app);
         end
 
         % Value changed function: NumberofhorizontalplanksSlider
@@ -297,7 +300,7 @@ classdef basic_exported < matlab.apps.AppBase
             value = app.GridLineThicknessSpinner.Value;
             app.uiGridlineWidth = value;
             
-            updateSquarePlot(app);
+            beginEstimation(app);
         end
     end
 
