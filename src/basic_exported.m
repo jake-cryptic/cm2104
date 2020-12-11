@@ -49,10 +49,10 @@ classdef basic_exported < matlab.apps.AppBase
     properties (Access = private)
 		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
         S	    =	1					% Scale factor
-        N	    =	2				% Number of needles
+        N	    =	2                   % Number of needles
 		NoP	    =	5					% Number of planks
-		D							% Distance between planks
-		SL							% Length of square side
+		D                               % Distance between planks
+		SL                              % Length of square side
 		
 		% Patch object
 		p
@@ -143,47 +143,22 @@ classdef basic_exported < matlab.apps.AppBase
 					sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
             
 			t = 2 * (app.N * 4) * app.SL;
-            
-%             disp(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D));
-%             disp(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D));
-%             disp(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D));
-%             disp(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
 			
 			pi_estimate = t / (n * app.D);
 			UIUpdateOutEstimate(app, ['Pi Estimate: ' num2str(pi_estimate)]);
 		end
 		
 		function calculateSquareSqrtTwo(app)
-            n = sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D) | floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D) |...
-                floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D) | floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D))
+            total_intersected = sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D) | floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D) |...
+                floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D) | floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
             
-%             disp('New one:')
-            % 1,2 - 4,1 : 2,3 - 3,4
-            %top
-%             disp(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D));
-%             disp(sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)));
-%             %left
-%             disp(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D));
-%             disp(sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)));
-%             %bottom
-%             disp(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D));
-%             disp(sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)));
-%             % Right
-%             disp(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D));
-%             disp(sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)));
-%             
-%             disp('Total crossing at diag:');
-%             disp(sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)) && sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)));
-%             disp(sum(floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) && sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)));
-%             disp(sum(floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D)) && sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)));
-%             disp(sum(floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)) && sum(floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)));
+            total_consequtive = 0;
+            total_consequtive = total_consequtive + sum((floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) & (floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D))) + ...
+                sum((floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)) & (floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)));
             
-            nn = 0;
-            nn = nn + sum((floor(app.xcr(2, :)/app.D) ~= floor(app.xcr(3, :)/app.D)) & (floor(app.xcr(3, :)/app.D) ~= floor(app.xcr(4, :)/app.D))) + ...
-                sum((floor(app.xcr(4, :)/app.D) ~= floor(app.xcr(1, :)/app.D)) & (floor(app.xcr(1, :)/app.D) ~= floor(app.xcr(2, :)/app.D)))
-            nnn = nn/n
+            total_con_over_int = total_consequtive/total_intersected;
 			
-			rt_estimate = 2 - nnn;
+			rt_estimate = 2 - total_con_over_int;
 			UIUpdateOutEstimate(app, ['Sqrt(2) Estimate: ' num2str(rt_estimate)]);
 		end
 		
