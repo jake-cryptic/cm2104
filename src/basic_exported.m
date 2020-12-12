@@ -10,7 +10,7 @@ classdef basic_exported < matlab.apps.AppBase
         NeedlesButton                   matlab.ui.control.RadioButton
         BestagonsButton                 matlab.ui.control.RadioButton
         NumberofsquaresSpinnerLabel     matlab.ui.control.Label
-        NumberofsquaresSpinner          matlab.ui.control.Spinner
+        NumberofitemSpinner             matlab.ui.control.Spinner
         NumberoffloorplanksSliderLabel  matlab.ui.control.Label
         NumberoffloorplanksSlider       matlab.ui.control.Slider
         EstimatevalueofButtonGroup      matlab.ui.container.ButtonGroup
@@ -21,7 +21,7 @@ classdef basic_exported < matlab.apps.AppBase
         PlottingStatusLampLabel         matlab.ui.control.Label
         PlottingStatusLamp              matlab.ui.control.Lamp
         LengthofsquaresidesSliderLabel  matlab.ui.control.Label
-        LengthofsquaresidesSlider       matlab.ui.control.Slider
+        LengthofitemsidesSlider         matlab.ui.control.Slider
         WarningSquarelengthPlankdistanceLabel  matlab.ui.control.Label
         NumberofhorizontalplanksSliderLabel  matlab.ui.control.Label
         NumberofhorizontalplanksSlider  matlab.ui.control.Slider
@@ -39,13 +39,13 @@ classdef basic_exported < matlab.apps.AppBase
         GridLineThicknessSpinnerLabel   matlab.ui.control.Label
         GridLineThicknessSpinner        matlab.ui.control.Spinner
         ModifyGridLineColorButton       matlab.ui.control.Button
-        CurrentLampLabel_2              matlab.ui.control.Label
-        CurrentFontColorLamp_2          matlab.ui.control.Lamp
-        ModifySquareColourButton_2      matlab.ui.control.Button
-        CurrentLampLabel_3              matlab.ui.control.Label
-        CurrentFontColorLamp_3          matlab.ui.control.Lamp
+        CurrentGridLineColourLabel      matlab.ui.control.Label
+        CurrentGridLineColour           matlab.ui.control.Lamp
+        ModifyShapeColourButton         matlab.ui.control.Button
+        CurrentShapeColourLabel         matlab.ui.control.Label
+        CurrentShapeColour              matlab.ui.control.Lamp
         SwitchLabel                     matlab.ui.control.Label
-        AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch  matlab.ui.control.Switch
+        AutoRerunSimulation             matlab.ui.control.Switch
         c1931370Label                   matlab.ui.control.Label
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
@@ -64,6 +64,7 @@ classdef basic_exported < matlab.apps.AppBase
         
         % Custom variables
         uiGridlineWidth =   1
+        uiGridlineColor = [0 0 0]
         currentTask = 1
 		
 		% Patch object
@@ -231,27 +232,45 @@ classdef basic_exported < matlab.apps.AppBase
         
         function UIUpdateCurrentTask(app, newTaskNo)
             if newTaskNo == 1
-                
+                set(app.roottwoButton, 'Enable', false);
+                set(app.NeedlesButton, 'Enable', false);
+                set(app.NumberofhorizontalplanksSlider, 'Enable', false);
             end
             if newTaskNo == 2
-                
+                set(app.roottwoButton, 'Enable', true);
+                set(app.NumberofhorizontalplanksSlider, 'Enable', false);
             end
             if newTaskNo == 3
-                
+                set(app.roottwoButton, 'Enable', false);
+                set(app.NeedlesButton, 'Enable', true);
+                set(app.NumberofhorizontalplanksSlider, 'Enable', true);
             end
             
             app.currentTask = newTaskNo;
         end
 		
+        function UIUpdateEstimationItem(app, item)
+            spinnerText = 'Number of Squares...';
+            lengthText = 'Length of Square sides...';
+            
+            if strcmp(item, 'Needles')
+                spinnerText = 'Number of Needles...';
+                lengthText = 'Length of Needle sides...';
+            end
+            
+            set(app.NumberofsquaresSpinnerLabel, 'Text', spinnerText);
+            set(app.LengthofsquaresidesSliderLabel, 'Text', lengthText);
+        end
+        
 		function updatePlotFloor(app)
 			for i = 0:app.DV:app.S
-				xline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth);
+				xline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
 			end
 		end
 		
 		function updatePlotGrid(app)
 			for i = 0:app.DH:app.S
-				yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth);
+				yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
 			end
 		end
 	end
@@ -265,9 +284,9 @@ classdef basic_exported < matlab.apps.AppBase
 			app.SL	=	app.DV / 2;
         end
 
-        % Value changed function: NumberofsquaresSpinner
-        function NumberofsquaresSpinnerValueChanged(app, event)
-            value = ceil(app.NumberofsquaresSpinner.Value);
+        % Value changed function: NumberofitemSpinner
+        function NumberofitemSpinnerValueChanged(app, event)
+            value = ceil(app.NumberofitemSpinner.Value);
             updateItemCount(app, value);
         end
 
@@ -309,9 +328,9 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.OutEstimateLabel, 'FontSize', value);
         end
 
-        % Value changed function: LengthofsquaresidesSlider
-        function LengthofsquaresidesSliderValueChanged(app, event)
-            value = app.LengthofsquaresidesSlider.Value;
+        % Value changed function: LengthofitemsidesSlider
+        function LengthofitemsidesSliderValueChanged(app, event)
+            value = app.LengthofitemsidesSlider.Value;
             
             [~, minVal] = min(abs(value - event.Source.MajorTicks(:)));
 			event.Source.Value = event.Source.MajorTicks(minVal);
@@ -323,7 +342,11 @@ classdef basic_exported < matlab.apps.AppBase
         function ModifyGridLineColorButtonPushed(app, event)
             c = uisetcolor([0 0 0], 'Change grid line colour');
             
-            set(app.OutEstimateLabel, 'FontColor', c);
+            app.uiGridlineColor = c;
+            
+            set(app.CurrentGridLineColour, 'Color', c);
+            
+            beginEstimation(app);
         end
 
         % Selection changed function: EstimatevalueofButtonGroup
@@ -363,6 +386,18 @@ classdef basic_exported < matlab.apps.AppBase
             selectedButton = app.SelectTaskButtonGroup.SelectedObject;
             UIUpdateCurrentTask(app, str2num(selectedButton.Text));
         end
+
+        % Selection changed function: EstimatevalueusingButtonGroup
+        function EstimatevalueusingButtonGroupSelectionChanged(app, event)
+            selectedButton = app.EstimatevalueusingButtonGroup.SelectedObject;
+            UIUpdateEstimationItem(app, selectedButton.Text);
+        end
+
+        % Button pushed function: ModifyShapeColourButton
+        function ModifyShapeColourButtonPushed(app, event)
+            c = uisetcolor([0 0 0], 'Change shape colour');
+			set(app.CurrentShapeColour, 'Color', '#0f0');
+        end
     end
 
     % Component initialization
@@ -386,6 +421,7 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create EstimatevalueusingButtonGroup
             app.EstimatevalueusingButtonGroup = uibuttongroup(app.PlotControlsTab);
+            app.EstimatevalueusingButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @EstimatevalueusingButtonGroupSelectionChanged, true);
             app.EstimatevalueusingButtonGroup.Title = 'Estimate value using...';
             app.EstimatevalueusingButtonGroup.Position = [152 333 147 95];
 
@@ -397,6 +433,7 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create NeedlesButton
             app.NeedlesButton = uiradiobutton(app.EstimatevalueusingButtonGroup);
+            app.NeedlesButton.Enable = 'off';
             app.NeedlesButton.Text = 'Needles';
             app.NeedlesButton.Position = [11 27 66 22];
 
@@ -412,13 +449,13 @@ classdef basic_exported < matlab.apps.AppBase
             app.NumberofsquaresSpinnerLabel.Position = [152 303 117 22];
             app.NumberofsquaresSpinnerLabel.Text = 'Number of squares...';
 
-            % Create NumberofsquaresSpinner
-            app.NumberofsquaresSpinner = uispinner(app.PlotControlsTab);
-            app.NumberofsquaresSpinner.Limits = [1 10000000];
-            app.NumberofsquaresSpinner.ValueChangedFcn = createCallbackFcn(app, @NumberofsquaresSpinnerValueChanged, true);
-            app.NumberofsquaresSpinner.HorizontalAlignment = 'left';
-            app.NumberofsquaresSpinner.Position = [156 282 142 22];
-            app.NumberofsquaresSpinner.Value = 1000;
+            % Create NumberofitemSpinner
+            app.NumberofitemSpinner = uispinner(app.PlotControlsTab);
+            app.NumberofitemSpinner.Limits = [1 10000000];
+            app.NumberofitemSpinner.ValueChangedFcn = createCallbackFcn(app, @NumberofitemSpinnerValueChanged, true);
+            app.NumberofitemSpinner.HorizontalAlignment = 'left';
+            app.NumberofitemSpinner.Position = [156 282 142 22];
+            app.NumberofitemSpinner.Value = 1000;
 
             % Create NumberoffloorplanksSliderLabel
             app.NumberoffloorplanksSliderLabel = uilabel(app.PlotControlsTab);
@@ -450,6 +487,7 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create roottwoButton
             app.roottwoButton = uiradiobutton(app.EstimatevalueofButtonGroup);
+            app.roottwoButton.Enable = 'off';
             app.roottwoButton.Text = '√2 - "root two"';
             app.roottwoButton.Position = [11 27 97 22];
 
@@ -483,15 +521,15 @@ classdef basic_exported < matlab.apps.AppBase
             app.LengthofsquaresidesSliderLabel.Position = [6 166 130 22];
             app.LengthofsquaresidesSliderLabel.Text = 'Length of square sides:';
 
-            % Create LengthofsquaresidesSlider
-            app.LengthofsquaresidesSlider = uislider(app.PlotControlsTab);
-            app.LengthofsquaresidesSlider.Limits = [1 10];
-            app.LengthofsquaresidesSlider.MajorTicks = [1 2 3 4 5 6 7 8 9 10];
-            app.LengthofsquaresidesSlider.MajorTickLabels = {'0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'};
-            app.LengthofsquaresidesSlider.ValueChangedFcn = createCallbackFcn(app, @LengthofsquaresidesSliderValueChanged, true);
-            app.LengthofsquaresidesSlider.MinorTicks = [];
-            app.LengthofsquaresidesSlider.Position = [15 155 267 7];
-            app.LengthofsquaresidesSlider.Value = 1;
+            % Create LengthofitemsidesSlider
+            app.LengthofitemsidesSlider = uislider(app.PlotControlsTab);
+            app.LengthofitemsidesSlider.Limits = [1 10];
+            app.LengthofitemsidesSlider.MajorTicks = [1 2 3 4 5 6 7 8 9 10];
+            app.LengthofitemsidesSlider.MajorTickLabels = {'0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'};
+            app.LengthofitemsidesSlider.ValueChangedFcn = createCallbackFcn(app, @LengthofitemsidesSliderValueChanged, true);
+            app.LengthofitemsidesSlider.MinorTicks = [];
+            app.LengthofitemsidesSlider.Position = [15 155 267 7];
+            app.LengthofitemsidesSlider.Value = 1;
 
             % Create WarningSquarelengthPlankdistanceLabel
             app.WarningSquarelengthPlankdistanceLabel = uilabel(app.PlotControlsTab);
@@ -513,6 +551,7 @@ classdef basic_exported < matlab.apps.AppBase
             app.NumberofhorizontalplanksSlider.MajorTickLabels = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10'};
             app.NumberofhorizontalplanksSlider.ValueChangedFcn = createCallbackFcn(app, @NumberofhorizontalplanksSliderValueChanged, true);
             app.NumberofhorizontalplanksSlider.MinorTicks = [];
+            app.NumberofhorizontalplanksSlider.Enable = 'off';
             app.NumberofhorizontalplanksSlider.Position = [10 225 135 7];
             app.NumberofhorizontalplanksSlider.Value = 5;
 
@@ -599,32 +638,33 @@ classdef basic_exported < matlab.apps.AppBase
             app.ModifyGridLineColorButton.Position = [15 236 137 22];
             app.ModifyGridLineColorButton.Text = 'Modify Grid Line Color';
 
-            % Create CurrentLampLabel_2
-            app.CurrentLampLabel_2 = uilabel(app.UIControlsTab);
-            app.CurrentLampLabel_2.HorizontalAlignment = 'right';
-            app.CurrentLampLabel_2.Position = [168 236 48 22];
-            app.CurrentLampLabel_2.Text = 'Current:';
+            % Create CurrentGridLineColourLabel
+            app.CurrentGridLineColourLabel = uilabel(app.UIControlsTab);
+            app.CurrentGridLineColourLabel.HorizontalAlignment = 'right';
+            app.CurrentGridLineColourLabel.Position = [168 236 48 22];
+            app.CurrentGridLineColourLabel.Text = 'Current:';
 
-            % Create CurrentFontColorLamp_2
-            app.CurrentFontColorLamp_2 = uilamp(app.UIControlsTab);
-            app.CurrentFontColorLamp_2.Position = [224 235 25 25];
-            app.CurrentFontColorLamp_2.Color = [0 0 0];
+            % Create CurrentGridLineColour
+            app.CurrentGridLineColour = uilamp(app.UIControlsTab);
+            app.CurrentGridLineColour.Position = [224 235 25 25];
+            app.CurrentGridLineColour.Color = [0 0 0];
 
-            % Create ModifySquareColourButton_2
-            app.ModifySquareColourButton_2 = uibutton(app.UIControlsTab, 'push');
-            app.ModifySquareColourButton_2.Position = [16 195 137 22];
-            app.ModifySquareColourButton_2.Text = 'Modify Square Colour';
+            % Create ModifyShapeColourButton
+            app.ModifyShapeColourButton = uibutton(app.UIControlsTab, 'push');
+            app.ModifyShapeColourButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourButtonPushed, true);
+            app.ModifyShapeColourButton.Position = [16 195 137 22];
+            app.ModifyShapeColourButton.Text = 'Modify Square Colour';
 
-            % Create CurrentLampLabel_3
-            app.CurrentLampLabel_3 = uilabel(app.UIControlsTab);
-            app.CurrentLampLabel_3.HorizontalAlignment = 'right';
-            app.CurrentLampLabel_3.Position = [167 194 48 22];
-            app.CurrentLampLabel_3.Text = 'Current:';
+            % Create CurrentShapeColourLabel
+            app.CurrentShapeColourLabel = uilabel(app.UIControlsTab);
+            app.CurrentShapeColourLabel.HorizontalAlignment = 'right';
+            app.CurrentShapeColourLabel.Position = [167 194 48 22];
+            app.CurrentShapeColourLabel.Text = 'Current:';
 
-            % Create CurrentFontColorLamp_3
-            app.CurrentFontColorLamp_3 = uilamp(app.UIControlsTab);
-            app.CurrentFontColorLamp_3.Position = [225 194 25 25];
-            app.CurrentFontColorLamp_3.Color = [0 0 0];
+            % Create CurrentShapeColour
+            app.CurrentShapeColour = uilamp(app.UIControlsTab);
+            app.CurrentShapeColour.Position = [225 194 25 25];
+            app.CurrentShapeColour.Color = [0 0 0];
 
             % Create SwitchLabel
             app.SwitchLabel = uilabel(app.UIControlsTab);
@@ -633,9 +673,9 @@ classdef basic_exported < matlab.apps.AppBase
             app.SwitchLabel.Position = [82 136 194 50];
             app.SwitchLabel.Text = 'Automatically re-run simulation when an important value changes';
 
-            % Create AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch
-            app.AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch = uiswitch(app.UIControlsTab, 'slider');
-            app.AutomaticallyrerunsimulationwhenanimportantvaluechangesSwitch.Position = [40 156 23 10];
+            % Create AutoRerunSimulation
+            app.AutoRerunSimulation = uiswitch(app.UIControlsTab, 'slider');
+            app.AutoRerunSimulation.Position = [40 156 23 10];
 
             % Create c1931370Label
             app.c1931370Label = uilabel(app.UIFigure);
