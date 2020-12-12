@@ -23,12 +23,12 @@ classdef basic_exported < matlab.apps.AppBase
         LengthofsquaresidesSliderLabel  matlab.ui.control.Label
         LengthofitemsidesSlider         matlab.ui.control.Slider
         WarningSquarelengthPlankdistanceLabel  matlab.ui.control.Label
-        NumberofhorizontalplanksSliderLabel  matlab.ui.control.Label
-        NumberofhorizontalplanksSlider  matlab.ui.control.Slider
+        NHorizontalTilesSliderLabel     matlab.ui.control.Label
+        NHorizontalTilesSlider          matlab.ui.control.Slider
         SelectTaskButtonGroup           matlab.ui.container.ButtonGroup
-        Button                          matlab.ui.control.ToggleButton
-        Button_2                        matlab.ui.control.ToggleButton
-        Button_3                        matlab.ui.control.ToggleButton
+        ButtonTask1                     matlab.ui.control.ToggleButton
+        ButtonTask2                     matlab.ui.control.ToggleButton
+        ButtonTask3                     matlab.ui.control.ToggleButton
         UIControlsTab                   matlab.ui.container.Tab
         FontSizeSliderLabel             matlab.ui.control.Label
         FontSizeSlider                  matlab.ui.control.Slider
@@ -231,19 +231,26 @@ classdef basic_exported < matlab.apps.AppBase
         end
         
         function UIUpdateCurrentTask(app, newTaskNo)
+            set(app.NHorizontalTilesSlider, 'Visible', false);
+            set(app.NHorizontalTilesSliderLabel, 'Visible', false);
+            set(app.roottwoButton, 'Enable', false);
+            set(app.NeedlesButton, 'Enable', false);
+            
             if newTaskNo == 1
-                set(app.roottwoButton, 'Enable', false);
-                set(app.NeedlesButton, 'Enable', false);
-                set(app.NumberofhorizontalplanksSlider, 'Enable', false);
+                set(app.NumberoffloorplanksSliderLabel, 'Text', 'Number of floor planks...');
             end
+            
             if newTaskNo == 2
                 set(app.roottwoButton, 'Enable', true);
-                set(app.NumberofhorizontalplanksSlider, 'Enable', false);
+                set(app.NumberoffloorplanksSliderLabel, 'Text', 'Number of floor planks...');
             end
+            
             if newTaskNo == 3
-                set(app.roottwoButton, 'Enable', false);
                 set(app.NeedlesButton, 'Enable', true);
-                set(app.NumberofhorizontalplanksSlider, 'Enable', true);
+                set(app.NHorizontalTilesSlider, 'Visible', true);
+                set(app.NHorizontalTilesSliderLabel, 'Visible', true);
+                
+                set(app.NumberoffloorplanksSliderLabel, 'Text', 'M (Verticle tiles)');
             end
             
             app.currentTask = newTaskNo;
@@ -362,9 +369,9 @@ classdef basic_exported < matlab.apps.AppBase
             beginEstimation(app);
         end
 
-        % Value changed function: NumberofhorizontalplanksSlider
-        function NumberofhorizontalplanksSliderValueChanged(app, event)
-            value = app.NumberofhorizontalplanksSlider.Value;
+        % Value changed function: NHorizontalTilesSlider
+        function NHorizontalTilesSliderValueChanged(app, event)
+            value = app.NHorizontalTilesSlider.Value;
             
             % Snap to nearest value
             [~, minVal] = min(abs(value - event.Source.MajorTicks(:)));
@@ -538,22 +545,23 @@ classdef basic_exported < matlab.apps.AppBase
             app.WarningSquarelengthPlankdistanceLabel.Position = [38 87 228 22];
             app.WarningSquarelengthPlankdistanceLabel.Text = 'Warning! Square length > Plank distance ';
 
-            % Create NumberofhorizontalplanksSliderLabel
-            app.NumberofhorizontalplanksSliderLabel = uilabel(app.PlotControlsTab);
-            app.NumberofhorizontalplanksSliderLabel.HorizontalAlignment = 'right';
-            app.NumberofhorizontalplanksSliderLabel.Position = [3 236 155 22];
-            app.NumberofhorizontalplanksSliderLabel.Text = 'Number of horizontal planks';
+            % Create NHorizontalTilesSliderLabel
+            app.NHorizontalTilesSliderLabel = uilabel(app.PlotControlsTab);
+            app.NHorizontalTilesSliderLabel.HorizontalAlignment = 'right';
+            app.NHorizontalTilesSliderLabel.Visible = 'off';
+            app.NHorizontalTilesSliderLabel.Position = [51 236 107 22];
+            app.NHorizontalTilesSliderLabel.Text = 'N (Horizontal Tiles)';
 
-            % Create NumberofhorizontalplanksSlider
-            app.NumberofhorizontalplanksSlider = uislider(app.PlotControlsTab);
-            app.NumberofhorizontalplanksSlider.Limits = [1 10];
-            app.NumberofhorizontalplanksSlider.MajorTicks = [1 2 3 4 5 6 7 8 9 10];
-            app.NumberofhorizontalplanksSlider.MajorTickLabels = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10'};
-            app.NumberofhorizontalplanksSlider.ValueChangedFcn = createCallbackFcn(app, @NumberofhorizontalplanksSliderValueChanged, true);
-            app.NumberofhorizontalplanksSlider.MinorTicks = [];
-            app.NumberofhorizontalplanksSlider.Enable = 'off';
-            app.NumberofhorizontalplanksSlider.Position = [10 225 135 7];
-            app.NumberofhorizontalplanksSlider.Value = 5;
+            % Create NHorizontalTilesSlider
+            app.NHorizontalTilesSlider = uislider(app.PlotControlsTab);
+            app.NHorizontalTilesSlider.Limits = [1 10];
+            app.NHorizontalTilesSlider.MajorTicks = [1 2 3 4 5 6 7 8 9 10];
+            app.NHorizontalTilesSlider.MajorTickLabels = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10'};
+            app.NHorizontalTilesSlider.ValueChangedFcn = createCallbackFcn(app, @NHorizontalTilesSliderValueChanged, true);
+            app.NHorizontalTilesSlider.MinorTicks = [];
+            app.NHorizontalTilesSlider.Visible = 'off';
+            app.NHorizontalTilesSlider.Position = [10 225 135 7];
+            app.NHorizontalTilesSlider.Value = 5;
 
             % Create SelectTaskButtonGroup
             app.SelectTaskButtonGroup = uibuttongroup(app.PlotControlsTab);
@@ -561,21 +569,21 @@ classdef basic_exported < matlab.apps.AppBase
             app.SelectTaskButtonGroup.Title = 'Select Task';
             app.SelectTaskButtonGroup.Position = [23 433 255 50];
 
-            % Create Button
-            app.Button = uitogglebutton(app.SelectTaskButtonGroup);
-            app.Button.Text = '1';
-            app.Button.Position = [13 5 54 22];
-            app.Button.Value = true;
+            % Create ButtonTask1
+            app.ButtonTask1 = uitogglebutton(app.SelectTaskButtonGroup);
+            app.ButtonTask1.Text = '1';
+            app.ButtonTask1.Position = [13 5 54 22];
+            app.ButtonTask1.Value = true;
 
-            % Create Button_2
-            app.Button_2 = uitogglebutton(app.SelectTaskButtonGroup);
-            app.Button_2.Text = '2';
-            app.Button_2.Position = [103 5 49 22];
+            % Create ButtonTask2
+            app.ButtonTask2 = uitogglebutton(app.SelectTaskButtonGroup);
+            app.ButtonTask2.Text = '2';
+            app.ButtonTask2.Position = [103 5 49 22];
 
-            % Create Button_3
-            app.Button_3 = uitogglebutton(app.SelectTaskButtonGroup);
-            app.Button_3.Text = '3';
-            app.Button_3.Position = [190 5 51 22];
+            % Create ButtonTask3
+            app.ButtonTask3 = uitogglebutton(app.SelectTaskButtonGroup);
+            app.ButtonTask3.Text = '3';
+            app.ButtonTask3.Position = [190 5 51 22];
 
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
