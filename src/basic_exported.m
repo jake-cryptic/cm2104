@@ -131,8 +131,8 @@ classdef basic_exported < matlab.apps.AppBase
         
         function updateNeedleRanomisation(app)
 			app.n_angles = rand(1, app.N) * 360;
-			app.nxc = rand(1, app.N);
-			app.nyc = rand(1, app.N);
+			app.nxc = app.SL + rand(1, app.N) * (app.S - 2 * app.SL);
+			app.nyc = app.SL + rand(1, app.N) * (app.S - 2 * app.SL);
 		end
 		
 		function updateNeedlePlot(app)
@@ -140,7 +140,7 @@ classdef basic_exported < matlab.apps.AppBase
 			updateNeedleRanomisation(app);
 			
 			app.nxcr = app.nxc + app.SL * cosd(app.n_angles);
-			app.nycr = app.nxc + app.SL * sind(app.n_angles);
+			app.nycr = app.nyc + app.SL * sind(app.n_angles);
 			
 			calculateNeedlePi(app);
 			
