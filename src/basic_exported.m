@@ -33,6 +33,8 @@ classdef basic_exported < matlab.apps.AppBase
         DonothingButton                 matlab.ui.control.ToggleButton
         HighlightclosestButton          matlab.ui.control.ToggleButton
         HighlightsimilaranglesButton    matlab.ui.control.ToggleButton
+        nSpinnerLabel                   matlab.ui.control.Label
+        nSpinner                        matlab.ui.control.Spinner
         UIControlsTab                   matlab.ui.container.Tab
         TabGroup2                       matlab.ui.container.TabGroup
         OutputTab                       matlab.ui.container.Tab
@@ -303,7 +305,22 @@ classdef basic_exported < matlab.apps.AppBase
             
             set(app.NumberofsquaresSpinnerLabel, 'Text', spinnerText);
             set(app.LengthofsquaresidesSliderLabel, 'Text', lengthText);
-		end
+        end
+        
+        function UIChangeNeedleSelections(app, selected)
+            set(app.nSpinner, 'Visible', false);
+            set(app.nSpinnerLabel, 'Visible', false);
+            
+            switch selected
+                case 'Highlight closest'
+                    set(app.nSpinner, 'Visible', true);
+                    set(app.nSpinnerLabel, 'Visible', true);
+                case 'Do nothing'
+                    disp('');
+                case 'Highlight similar angles'
+                    disp('');
+            end
+        end
 		
 		function LineSelected(app, src, evt)
             if ~isempty(app.lastClickedLine)
@@ -493,6 +510,14 @@ classdef basic_exported < matlab.apps.AppBase
             
             app.uiSimilarPolyColor = c;
         end
+
+        % Selection changed function: 
+        % SelectedNeedleControlsButtonGroup
+        function SelectedNeedleControlsButtonGroupSelectionChanged(app, event)
+            selectedButton = app.SelectedNeedleControlsButtonGroup.SelectedObject;
+            
+            UIChangeNeedleSelections(app, selectedButton.Text);
+        end
     end
 
     % Component initialization
@@ -630,7 +655,7 @@ classdef basic_exported < matlab.apps.AppBase
             app.WarningSquarelengthPlankdistanceLabel = uilabel(app.PlotControlsTab);
             app.WarningSquarelengthPlankdistanceLabel.FontColor = [1 0 0];
             app.WarningSquarelengthPlankdistanceLabel.Visible = 'off';
-            app.WarningSquarelengthPlankdistanceLabel.Position = [38 87 228 22];
+            app.WarningSquarelengthPlankdistanceLabel.Position = [25 187 228 22];
             app.WarningSquarelengthPlankdistanceLabel.Text = 'Warning! Square length > Plank distance ';
 
             % Create NHorizontalTilesSliderLabel
@@ -675,6 +700,7 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create SelectedNeedleControlsButtonGroup
             app.SelectedNeedleControlsButtonGroup = uibuttongroup(app.PlotControlsTab);
+            app.SelectedNeedleControlsButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @SelectedNeedleControlsButtonGroupSelectionChanged, true);
             app.SelectedNeedleControlsButtonGroup.Title = 'Selected Needle Controls';
             app.SelectedNeedleControlsButtonGroup.Position = [7 3 157 106];
 
@@ -693,6 +719,18 @@ classdef basic_exported < matlab.apps.AppBase
             app.HighlightsimilaranglesButton = uitogglebutton(app.SelectedNeedleControlsButtonGroup);
             app.HighlightsimilaranglesButton.Text = 'Highlight similar angles';
             app.HighlightsimilaranglesButton.Position = [9 9 137 22];
+
+            % Create nSpinnerLabel
+            app.nSpinnerLabel = uilabel(app.PlotControlsTab);
+            app.nSpinnerLabel.HorizontalAlignment = 'right';
+            app.nSpinnerLabel.Visible = 'off';
+            app.nSpinnerLabel.Position = [196 87 25 22];
+            app.nSpinnerLabel.Text = 'n';
+
+            % Create nSpinner
+            app.nSpinner = uispinner(app.PlotControlsTab);
+            app.nSpinner.Visible = 'off';
+            app.nSpinner.Position = [236 87 43 22];
 
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
