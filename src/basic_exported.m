@@ -46,7 +46,6 @@ classdef basic_exported < matlab.apps.AppBase
         CurrentShapeColour              matlab.ui.control.Lamp
         SwitchLabel                     matlab.ui.control.Label
         AutoRerunSimulation             matlab.ui.control.Switch
-        c1931370Label                   matlab.ui.control.Label
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
     end
@@ -55,7 +54,7 @@ classdef basic_exported < matlab.apps.AppBase
     properties (Access = private)
 		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
         S	    =	1					% Scale factor
-        N	    =	2000			    % Number of shapes
+        N	    =	2			     % Number of shapes
 		NoVP	=	5				    % Number of planks
         NoHP    =   5                   % Number of horizontal planks
 		DV							    % Distance between vertical planks
@@ -119,8 +118,8 @@ classdef basic_exported < matlab.apps.AppBase
             end
         end
         
-		function updateItemCount(app, squareCount)
-			app.N = squareCount;
+        function updateItemCount(app, itemCount)
+			app.N = itemCount;
 			beginEstimation(app);
 		end
         
@@ -180,8 +179,17 @@ classdef basic_exported < matlab.apps.AppBase
             else
                 calculateSquareSqrtTwo(app);
             end
+            
+            intersecting = floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
+                floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV)
+            
+            app.xcr
+            app.ycr
+            app.xcr(:,intersecting)
+            app.ycr(:,intersecting)
 			
-			app.pat = patch(app.UIAxes, app.xcr, app.ycr, 'red');
+			app.pat = patch(app.UIAxes, app.xcr(:,intersecting), app.ycr(:,intersecting), 'green');
+            app.pat = [app.pat, patch(app.UIAxes, app.xcr(:,intersecting ~= 1), app.ycr(:,intersecting ~= 1), 'red')];
 		end
 		
 		function calculateNeedlePi(app)
@@ -684,11 +692,6 @@ classdef basic_exported < matlab.apps.AppBase
             % Create AutoRerunSimulation
             app.AutoRerunSimulation = uiswitch(app.UIControlsTab, 'slider');
             app.AutoRerunSimulation.Position = [40 156 23 10];
-
-            % Create c1931370Label
-            app.c1931370Label = uilabel(app.UIFigure);
-            app.c1931370Label.Position = [750 504 54 15];
-            app.c1931370Label.Text = 'c1931370';
 
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.UIFigure);
