@@ -166,7 +166,7 @@ classdef basic_exported < matlab.apps.AppBase
         function workOutNeedleGradients(app)
             app.nmd = 1:app.N;
             for i = 1:app.N
-                app.nmd(i) = (app.nyc - app.nycr(i)) / (app.nxc - app.nxcr(i));
+                app.nmd(i) = (app.nyc(i) - app.nycr(i)) / (app.nxc(i) - app.nxcr(i));
             end
             
             app.nmd
@@ -312,6 +312,10 @@ classdef basic_exported < matlab.apps.AppBase
             md = (yd(1) - yd(2)) / (xd(1) - xd(2))
             
             % Compare to other lines
+            sorted_md = sort(app.nmd);
+            for i = 1:app.Similar
+                
+            end
             
             % Highlight n similar lines
             
@@ -386,7 +390,7 @@ classdef basic_exported < matlab.apps.AppBase
         end
 		
 		function LineSelected(app, src, evt)
-            if ~isempty(app.lastClickedLine)
+            if ~isempty(app.lastClickedLine) && isvalid(app.lastClickedLine)
 			    set(app.lastClickedLine, 'Color', app.lastClickedLineColor);
             end
             
