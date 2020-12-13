@@ -53,6 +53,8 @@ classdef basic_exported < matlab.apps.AppBase
         GridLineThicknessSpinner        matlab.ui.control.Spinner
         ModifyShapeColourSelectedButton  matlab.ui.control.Button
         CurrentShapeColourSelected      matlab.ui.control.Lamp
+        ModifyShapeColourSimilarButton  matlab.ui.control.Button
+        CurrentShapeColourSimilar       matlab.ui.control.Lamp
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
     end
@@ -74,12 +76,17 @@ classdef basic_exported < matlab.apps.AppBase
         uiSelectedPolyColor = [0 0 1]
         uiIntersectPolyColor = [1 0 0]
         uiNonIntersectPolyColor = [0 1 0]
+        uiSimilarPolyColor = [0.72 0.27 1.0]
         currentTask = 1
 		
 		% Patch object
 		pat
         plt
         plti
+        
+        gridlinesH
+        gridlinesV
+        
         lastClickedLine
         lastClickedLineColor = [0 0 0]
 		
@@ -309,15 +316,23 @@ classdef basic_exported < matlab.apps.AppBase
 		end
         
 		function updatePlotFloor(app)
+            app.gridlinesV = 1:app.NoVP+1;
+            c = 0;
 			for i = 0:app.DV:app.S
-				xline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
+                c = c+1;
+				app.gridlinesV(c) = xline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
 			end
 			
 			if app.currentTask == 3
+                app.gridlinesH = 1:app.NoHP+1;
+                c = 0;
 				for i = 0:app.DH:app.S
-					yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
-				end
+                    c = c+1;
+					app.gridlinesH(c) = yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
+                end
 			end
+            app.gridlinesH
+            app.gridlinesV
 		end
 	end
 
@@ -392,8 +407,11 @@ classdef basic_exported < matlab.apps.AppBase
             app.uiGridlineColor = c;
             
             set(app.CurrentGridLineColour, 'Color', c);
+            set(app.gridlinesV, 'Color', c);
             
-            beginEstimation(app);
+            if ~isempty(app.gridlinesH)
+                set(app.gridlinesH, 'Color', c);
+            end
         end
 
         % Selection changed function: EstimatevalueofButtonGroup
@@ -425,7 +443,10 @@ classdef basic_exported < matlab.apps.AppBase
             value = app.GridLineThicknessSpinner.Value;
             app.uiGridlineWidth = value;
             
-            beginEstimation(app);
+            set(app.gridlinesV, 'LineWidth', value);
+            if ~isempty(app.gridlinesH)
+                set(app.gridlinesH, 'LineWidth', value);
+            end
         end
 
         % Selection changed function: SelectTaskButtonGroup
@@ -463,6 +484,14 @@ classdef basic_exported < matlab.apps.AppBase
 			set(app.CurrentShapeColourSelected, 'Color', c);
             
             app.uiSelectedPolyColor = c;
+        end
+
+        % Button pushed function: ModifyShapeColourSimilarButton
+        function ModifyShapeColourSimilarButtonPushed(app, event)
+            c = uisetcolor([0 0 0], 'Change selected needle colour');
+			set(app.CurrentShapeColourSelected, 'Color', c);
+            
+            app.uiSimilarPolyColor = c;
         end
     end
 
@@ -774,6 +803,17 @@ classdef basic_exported < matlab.apps.AppBase
             app.CurrentShapeColourSelected = uilamp(app.FigureTab);
             app.CurrentShapeColourSelected.Position = [16 301 25 25];
             app.CurrentShapeColourSelected.Color = [0 0 1];
+
+            % Create ModifyShapeColourSimilarButton
+            app.ModifyShapeColourSimilarButton = uibutton(app.FigureTab, 'push');
+            app.ModifyShapeColourSimilarButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourSimilarButtonPushed, true);
+            app.ModifyShapeColourSimilarButton.Position = [72 271 181 22];
+            app.ModifyShapeColourSimilarButton.Text = 'Modify Similar Needle Colour';
+
+            % Create CurrentShapeColourSimilar
+            app.CurrentShapeColourSimilar = uilamp(app.FigureTab);
+            app.CurrentShapeColourSimilar.Position = [16 270 25 25];
+            app.CurrentShapeColourSimilar.Color = [0.7216 0.2706 1];
 
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.UIFigure);
