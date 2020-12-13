@@ -30,22 +30,23 @@ classdef basic_exported < matlab.apps.AppBase
         ButtonTask2                     matlab.ui.control.ToggleButton
         ButtonTask3                     matlab.ui.control.ToggleButton
         UIControlsTab                   matlab.ui.container.Tab
+        SwitchLabel                     matlab.ui.control.Label
+        AutoRerunSimulation             matlab.ui.control.Switch
+        TabGroup2                       matlab.ui.container.TabGroup
+        OutputTab                       matlab.ui.container.Tab
         FontSizeSliderLabel             matlab.ui.control.Label
         FontSizeSlider                  matlab.ui.control.Slider
         ModifyFontColourButton          matlab.ui.control.Button
-        CurrentLampLabel                matlab.ui.control.Label
         CurrentFontColorLamp            matlab.ui.control.Lamp
-        ModifyhowtheestimateisdisplayedLabel  matlab.ui.control.Label
+        FigureTab                       matlab.ui.container.Tab
+        ModifyShapeColourNonIntersectButton  matlab.ui.control.Button
+        CurrentShapeColourNonIntersect  matlab.ui.control.Lamp
+        ModifyShapeColourIntersectButton  matlab.ui.control.Button
+        CurrentShapeColourIntersect     matlab.ui.control.Lamp
+        ModifyGridLineColorButton       matlab.ui.control.Button
+        CurrentGridLineColour           matlab.ui.control.Lamp
         GridLineThicknessSpinnerLabel   matlab.ui.control.Label
         GridLineThicknessSpinner        matlab.ui.control.Spinner
-        ModifyGridLineColorButton       matlab.ui.control.Button
-        CurrentGridLineColourLabel      matlab.ui.control.Label
-        CurrentGridLineColour           matlab.ui.control.Lamp
-        ModifyShapeColourButton         matlab.ui.control.Button
-        CurrentShapeColourLabel         matlab.ui.control.Label
-        CurrentShapeColour              matlab.ui.control.Lamp
-        SwitchLabel                     matlab.ui.control.Label
-        AutoRerunSimulation             matlab.ui.control.Switch
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
     end
@@ -185,8 +186,8 @@ classdef basic_exported < matlab.apps.AppBase
             intersecting = floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
                 floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV);
 			
-			app.pat = patch(app.UIAxes, app.xcr(:,intersecting), app.ycr(:,intersecting), 'green');
-            app.pat = [app.pat, patch(app.UIAxes, app.xcr(:,~intersecting), app.ycr(:,~intersecting), 'red')];
+			app.pat = patch(app.UIAxes, app.xcr(:,intersecting), app.ycr(:,intersecting), 'w', 'EdgeColor', 'green');
+            app.pat = [app.pat, patch(app.UIAxes, app.xcr(:,~intersecting), app.ycr(:,~intersecting), 'w', 'EdgeColor', 'red')];
 		end
 		
 		function calculateNeedlePi(app)
@@ -416,10 +417,17 @@ classdef basic_exported < matlab.apps.AppBase
             UIUpdateEstimationItem(app, selectedButton.Text);
         end
 
-        % Button pushed function: ModifyShapeColourButton
-        function ModifyShapeColourButtonPushed(app, event)
-            c = uisetcolor([0 0 0], 'Change shape colour');
-			set(app.CurrentShapeColour, 'Color', '#0f0');
+        % Button pushed function: ModifyShapeColourIntersectButton
+        function ModifyShapeColourIntersectButtonPushed(app, event)
+            c = uisetcolor([0 0 0], 'Change intersecting shape colour');
+			set(app.CurrentShapeColourIntersect, 'Color', '#0f0');
+        end
+
+        % Button pushed function: 
+        % ModifyShapeColourNonIntersectButton
+        function ModifyShapeColourNonIntersectButtonPushed(app, event)
+            c = uisetcolor([0 0 0], 'Change non-intersecting shape colour');
+			set(app.CurrentShapeColourNonIntersect, 'Color', '#f00');
         end
     end
 
@@ -605,101 +613,100 @@ classdef basic_exported < matlab.apps.AppBase
             app.UIControlsTab = uitab(app.TabGroup);
             app.UIControlsTab.Title = 'UI Controls';
 
+            % Create SwitchLabel
+            app.SwitchLabel = uilabel(app.UIControlsTab);
+            app.SwitchLabel.HorizontalAlignment = 'center';
+            app.SwitchLabel.WordWrap = 'on';
+            app.SwitchLabel.Position = [79 25 194 50];
+            app.SwitchLabel.Text = 'Automatically re-run simulation when an important value changes';
+
+            % Create AutoRerunSimulation
+            app.AutoRerunSimulation = uiswitch(app.UIControlsTab, 'slider');
+            app.AutoRerunSimulation.Position = [37 45 23 10];
+
+            % Create TabGroup2
+            app.TabGroup2 = uitabgroup(app.UIControlsTab);
+            app.TabGroup2.Position = [0 87 301 408];
+
+            % Create OutputTab
+            app.OutputTab = uitab(app.TabGroup2);
+            app.OutputTab.Title = 'Output';
+
             % Create FontSizeSliderLabel
-            app.FontSizeSliderLabel = uilabel(app.UIControlsTab);
+            app.FontSizeSliderLabel = uilabel(app.OutputTab);
             app.FontSizeSliderLabel.HorizontalAlignment = 'right';
-            app.FontSizeSliderLabel.Position = [47 428 56 22];
+            app.FontSizeSliderLabel.Position = [123 356 56 22];
             app.FontSizeSliderLabel.Text = 'Font Size';
 
             % Create FontSizeSlider
-            app.FontSizeSlider = uislider(app.UIControlsTab);
+            app.FontSizeSlider = uislider(app.OutputTab);
             app.FontSizeSlider.Limits = [12 20];
             app.FontSizeSlider.MajorTicks = [12 14 16 18 20];
             app.FontSizeSlider.MajorTickLabels = {'XS', 'S', 'M', 'L', 'XL'};
             app.FontSizeSlider.ValueChangedFcn = createCallbackFcn(app, @FontSizeSliderValueChanged, true);
             app.FontSizeSlider.MinorTicks = [];
-            app.FontSizeSlider.Position = [19 418 112 7];
+            app.FontSizeSlider.Position = [23 346 256 7];
             app.FontSizeSlider.Value = 14;
 
             % Create ModifyFontColourButton
-            app.ModifyFontColourButton = uibutton(app.UIControlsTab, 'push');
+            app.ModifyFontColourButton = uibutton(app.OutputTab, 'push');
             app.ModifyFontColourButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyFontColourButtonPushed, true);
-            app.ModifyFontColourButton.Position = [11 347 137 22];
+            app.ModifyFontColourButton.Position = [67 273 137 22];
             app.ModifyFontColourButton.Text = 'Modify Font Colour';
 
-            % Create CurrentLampLabel
-            app.CurrentLampLabel = uilabel(app.UIControlsTab);
-            app.CurrentLampLabel.HorizontalAlignment = 'right';
-            app.CurrentLampLabel.Position = [166 346 48 22];
-            app.CurrentLampLabel.Text = 'Current:';
-
             % Create CurrentFontColorLamp
-            app.CurrentFontColorLamp = uilamp(app.UIControlsTab);
-            app.CurrentFontColorLamp.Position = [224 346 25 25];
+            app.CurrentFontColorLamp = uilamp(app.OutputTab);
+            app.CurrentFontColorLamp.Position = [23 272 25 25];
             app.CurrentFontColorLamp.Color = [0 0 0];
 
-            % Create ModifyhowtheestimateisdisplayedLabel
-            app.ModifyhowtheestimateisdisplayedLabel = uilabel(app.UIControlsTab);
-            app.ModifyhowtheestimateisdisplayedLabel.Position = [8 456 201 22];
-            app.ModifyhowtheestimateisdisplayedLabel.Text = 'Modify how the estimate is displayed';
+            % Create FigureTab
+            app.FigureTab = uitab(app.TabGroup2);
+            app.FigureTab.Title = 'Figure';
+
+            % Create ModifyShapeColourNonIntersectButton
+            app.ModifyShapeColourNonIntersectButton = uibutton(app.FigureTab, 'push');
+            app.ModifyShapeColourNonIntersectButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourNonIntersectButtonPushed, true);
+            app.ModifyShapeColourNonIntersectButton.Position = [47 282 229 22];
+            app.ModifyShapeColourNonIntersectButton.Text = 'Modify Non-intersecting Polygon Colour';
+
+            % Create CurrentShapeColourNonIntersect
+            app.CurrentShapeColourNonIntersect = uilamp(app.FigureTab);
+            app.CurrentShapeColourNonIntersect.Position = [16 281 25 25];
+            app.CurrentShapeColourNonIntersect.Color = [1 0 0];
+
+            % Create ModifyShapeColourIntersectButton
+            app.ModifyShapeColourIntersectButton = uibutton(app.FigureTab, 'push');
+            app.ModifyShapeColourIntersectButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourIntersectButtonPushed, true);
+            app.ModifyShapeColourIntersectButton.Position = [60 316 204 22];
+            app.ModifyShapeColourIntersectButton.Text = 'Modify Intersecting Polygon Colour';
+
+            % Create CurrentShapeColourIntersect
+            app.CurrentShapeColourIntersect = uilamp(app.FigureTab);
+            app.CurrentShapeColourIntersect.Position = [15 316 25 25];
+
+            % Create ModifyGridLineColorButton
+            app.ModifyGridLineColorButton = uibutton(app.FigureTab, 'push');
+            app.ModifyGridLineColorButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyGridLineColorButtonPushed, true);
+            app.ModifyGridLineColorButton.Position = [94 350 137 22];
+            app.ModifyGridLineColorButton.Text = 'Modify Grid Line Color';
+
+            % Create CurrentGridLineColour
+            app.CurrentGridLineColour = uilamp(app.FigureTab);
+            app.CurrentGridLineColour.Position = [15 349 25 25];
+            app.CurrentGridLineColour.Color = [0 0 0];
 
             % Create GridLineThicknessSpinnerLabel
-            app.GridLineThicknessSpinnerLabel = uilabel(app.UIControlsTab);
+            app.GridLineThicknessSpinnerLabel = uilabel(app.FigureTab);
             app.GridLineThicknessSpinnerLabel.HorizontalAlignment = 'right';
-            app.GridLineThicknessSpinnerLabel.Position = [16 283 111 22];
+            app.GridLineThicknessSpinnerLabel.Position = [23 246 111 22];
             app.GridLineThicknessSpinnerLabel.Text = 'Grid Line Thickness';
 
             % Create GridLineThicknessSpinner
-            app.GridLineThicknessSpinner = uispinner(app.UIControlsTab);
+            app.GridLineThicknessSpinner = uispinner(app.FigureTab);
             app.GridLineThicknessSpinner.Limits = [1 5];
             app.GridLineThicknessSpinner.ValueChangedFcn = createCallbackFcn(app, @GridLineThicknessSpinnerValueChanged, true);
-            app.GridLineThicknessSpinner.Position = [142 283 100 22];
+            app.GridLineThicknessSpinner.Position = [149 246 100 22];
             app.GridLineThicknessSpinner.Value = 1;
-
-            % Create ModifyGridLineColorButton
-            app.ModifyGridLineColorButton = uibutton(app.UIControlsTab, 'push');
-            app.ModifyGridLineColorButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyGridLineColorButtonPushed, true);
-            app.ModifyGridLineColorButton.Position = [15 236 137 22];
-            app.ModifyGridLineColorButton.Text = 'Modify Grid Line Color';
-
-            % Create CurrentGridLineColourLabel
-            app.CurrentGridLineColourLabel = uilabel(app.UIControlsTab);
-            app.CurrentGridLineColourLabel.HorizontalAlignment = 'right';
-            app.CurrentGridLineColourLabel.Position = [168 236 48 22];
-            app.CurrentGridLineColourLabel.Text = 'Current:';
-
-            % Create CurrentGridLineColour
-            app.CurrentGridLineColour = uilamp(app.UIControlsTab);
-            app.CurrentGridLineColour.Position = [224 235 25 25];
-            app.CurrentGridLineColour.Color = [0 0 0];
-
-            % Create ModifyShapeColourButton
-            app.ModifyShapeColourButton = uibutton(app.UIControlsTab, 'push');
-            app.ModifyShapeColourButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourButtonPushed, true);
-            app.ModifyShapeColourButton.Position = [16 195 137 22];
-            app.ModifyShapeColourButton.Text = 'Modify Square Colour';
-
-            % Create CurrentShapeColourLabel
-            app.CurrentShapeColourLabel = uilabel(app.UIControlsTab);
-            app.CurrentShapeColourLabel.HorizontalAlignment = 'right';
-            app.CurrentShapeColourLabel.Position = [167 194 48 22];
-            app.CurrentShapeColourLabel.Text = 'Current:';
-
-            % Create CurrentShapeColour
-            app.CurrentShapeColour = uilamp(app.UIControlsTab);
-            app.CurrentShapeColour.Position = [225 194 25 25];
-            app.CurrentShapeColour.Color = [0 0 0];
-
-            % Create SwitchLabel
-            app.SwitchLabel = uilabel(app.UIControlsTab);
-            app.SwitchLabel.HorizontalAlignment = 'center';
-            app.SwitchLabel.WordWrap = 'on';
-            app.SwitchLabel.Position = [82 136 194 50];
-            app.SwitchLabel.Text = 'Automatically re-run simulation when an important value changes';
-
-            % Create AutoRerunSimulation
-            app.AutoRerunSimulation = uiswitch(app.UIControlsTab, 'slider');
-            app.AutoRerunSimulation.Position = [40 156 23 10];
 
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.UIFigure);
