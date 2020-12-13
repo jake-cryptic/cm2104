@@ -138,8 +138,6 @@ classdef basic_exported < matlab.apps.AppBase
 		function updateNeedlePlot(app)
 			UIDoClearAxes(app);
 			updateNeedleRanomisation(app);
-			updatePlotFloor(app);
-			updatePlotGrid(app);
 			
 			app.nxcr = app.nxc + app.SL * cosd(app.n_angles);
 			app.nycr = app.nxc + app.SL * sind(app.n_angles);
@@ -147,6 +145,8 @@ classdef basic_exported < matlab.apps.AppBase
 			calculateNeedlePi(app);
 			
             app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2);
+			updatePlotFloor(app);
+			updatePlotGrid(app);
 		end
 		
 		function updateSquareRanomisation(app)
@@ -181,15 +181,10 @@ classdef basic_exported < matlab.apps.AppBase
             end
             
             intersecting = floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
-                floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV)
-            
-            app.xcr
-            app.ycr
-            app.xcr(:,intersecting)
-            app.ycr(:,intersecting)
+                floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV);
 			
 			app.pat = patch(app.UIAxes, app.xcr(:,intersecting), app.ycr(:,intersecting), 'green');
-            app.pat = [app.pat, patch(app.UIAxes, app.xcr(:,intersecting ~= 1), app.ycr(:,intersecting ~= 1), 'red')];
+            app.pat = [app.pat, patch(app.UIAxes, app.xcr(:,~intersecting), app.ycr(:,~intersecting), 'red')];
 		end
 		
 		function calculateNeedlePi(app)
@@ -207,7 +202,9 @@ classdef basic_exported < matlab.apps.AppBase
 			n = n + sum(floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV)) + ...
 					sum(floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV)) + ...
 					sum(floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV)) + ...
-					sum(floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV));
+					sum(floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV))
+            
+            %sqi = [floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV); floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV); floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV); floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV)]'
             
 			t = 2 * (app.N * 4) * app.SL;
 			
@@ -284,7 +281,7 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function updatePlotGrid(app)
-			for i = 0:app.DH:app.S
+            for i = 0:app.DH:app.S
 				yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
 			end
 		end
