@@ -31,8 +31,8 @@ classdef basic_exported < matlab.apps.AppBase
         ButtonTask3                     matlab.ui.control.ToggleButton
         SelectedNeedleControlsButtonGroup  matlab.ui.container.ButtonGroup
         DonothingButton                 matlab.ui.control.ToggleButton
-        HighlightclosestButton          matlab.ui.control.ToggleButton
         HighlightsimilaranglesButton    matlab.ui.control.ToggleButton
+        HighlightclosestButton          matlab.ui.control.ToggleButton
         nSpinnerLabel                   matlab.ui.control.Label
         nSpinner                        matlab.ui.control.Spinner
         UIControlsTab                   matlab.ui.container.Tab
@@ -83,6 +83,7 @@ classdef basic_exported < matlab.apps.AppBase
         
         % Task state of UI
         currentTask = 1
+        highlightTask = 0
 		
 		% Patch & plot objects
 		pat
@@ -117,6 +118,9 @@ classdef basic_exported < matlab.apps.AppBase
             if app.currentTask == 1 || app.currentTask == 2
 			    updateSquarePlot(app);
             else
+                app.lastClickedLine = [];
+                app.lastClickedLineColor = [0 0 0];
+                
                 updateNeedlePlot(app);
             end
         end
@@ -285,7 +289,12 @@ classdef basic_exported < matlab.apps.AppBase
         end
         
         function highlightNeedles(app)
-            rehighlightClosestNeedles(app);
+            disp(app.highlightTask);
+            if app.highlightTask == 1
+                rehighlightClosestNeedles(app);
+            elseif app.highlightTask == 2
+                disp('4.2');
+            end
         end
         
         function rehighlightClosestNeedles(app)
@@ -294,12 +303,12 @@ classdef basic_exported < matlab.apps.AppBase
         end
         
         function removeHighlightClosestNeedles(app)
-            
+            % Clear and re-plot without random regen
         end
         
         function highlightClosestNeedles(app)
             if isempty(app.lastClickedLine)
-                disp('Fuck');
+                disp('No line selected');
                 return;
             end
             
@@ -307,20 +316,17 @@ classdef basic_exported < matlab.apps.AppBase
             yd = app.lastClickedLine.YData;
             
             % Calculate gradient for this line
-            md = (yd(1) - yd(2)) / (xd(1) - xd(2))
+            md = (yd(1) - yd(2)) / (xd(1) - xd(2));
             
             % Compare to other lines
             app.nmd
-            diff = app.nmd - md
-            absdiff = abs(diff)
+            diff = app.nmd - md;
+            absdiff = abs(diff);
             absdiffsorted = sort(absdiff);
-            nsim = absdiffsorted(1:app.Similar)
-            pos = ismember(absdiff, nsim);
             
-            simxc = app.xc(pos)
-            simxcr = app.xcr(pos)
-            simyc = app.yc(pos)
-            simycr = app.ycr(pos)
+            % Find similar (we use 2:Similar+1 so as to not select original needle)
+            nsim = absdiffsorted(2:(app.Similar+1));
+            pos = ismember(absdiff, nsim);
             
             % Highlight n similar lines
             set(app.plt(pos), 'Color', app.uiSimilarPolyColor);
@@ -382,14 +388,15 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.nSpinnerLabel, 'Visible', false);
             
             switch selected
-                case 'Highlight closest'
+                case '1. Do nothing'
+                    app.highlightTask = 0;
+                case '2. Highlight similar angles'
+                    app.highlightTask = 1;
                     set(app.nSpinner, 'Visible', true);
                     set(app.nSpinnerLabel, 'Visible', true);
-                    highlightClosestNeedles(app);
-                case 'Do nothing'
-                    disp('');
-                case 'Highlight similar angles'
-                    disp('');
+                    highlightNeedles(app);
+                case '3. Highlight closest'
+                    app.highlightTask = 2;
             end
         end
 		
@@ -785,19 +792,19 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create DonothingButton
             app.DonothingButton = uitogglebutton(app.SelectedNeedleControlsButtonGroup);
-            app.DonothingButton.Text = 'Do nothing';
-            app.DonothingButton.Position = [9 55 138 22];
+            app.DonothingButton.Text = '1. Do nothing';
+            app.DonothingButton.Position = [3 55 151 22];
             app.DonothingButton.Value = true;
-
-            % Create HighlightclosestButton
-            app.HighlightclosestButton = uitogglebutton(app.SelectedNeedleControlsButtonGroup);
-            app.HighlightclosestButton.Text = 'Highlight closest';
-            app.HighlightclosestButton.Position = [9 32 137 22];
 
             % Create HighlightsimilaranglesButton
             app.HighlightsimilaranglesButton = uitogglebutton(app.SelectedNeedleControlsButtonGroup);
-            app.HighlightsimilaranglesButton.Text = 'Highlight similar angles';
-            app.HighlightsimilaranglesButton.Position = [9 9 137 22];
+            app.HighlightsimilaranglesButton.Text = '2. Highlight similar angles';
+            app.HighlightsimilaranglesButton.Position = [2 32 152 22];
+
+            % Create HighlightclosestButton
+            app.HighlightclosestButton = uitogglebutton(app.SelectedNeedleControlsButtonGroup);
+            app.HighlightclosestButton.Text = '3. Highlight closest';
+            app.HighlightclosestButton.Position = [3 9 151 22];
 
             % Create nSpinnerLabel
             app.nSpinnerLabel = uilabel(app.PlotControlsTab);
