@@ -29,6 +29,10 @@ classdef basic_exported < matlab.apps.AppBase
         ButtonTask1                     matlab.ui.control.ToggleButton
         ButtonTask2                     matlab.ui.control.ToggleButton
         ButtonTask3                     matlab.ui.control.ToggleButton
+        SelectedNeedleControlsButtonGroup  matlab.ui.container.ButtonGroup
+        DonothingButton                 matlab.ui.control.ToggleButton
+        HighlightclosestButton          matlab.ui.control.ToggleButton
+        HighlightsimilaranglesButton    matlab.ui.control.ToggleButton
         UIControlsTab                   matlab.ui.container.Tab
         TabGroup2                       matlab.ui.container.TabGroup
         OutputTab                       matlab.ui.container.Tab
@@ -564,7 +568,7 @@ classdef basic_exported < matlab.apps.AppBase
             app.EstimateButton.ButtonPushedFcn = createCallbackFcn(app, @EstimateButtonPushed, true);
             app.EstimateButton.Interruptible = 'off';
             app.EstimateButton.FontSize = 18;
-            app.EstimateButton.Position = [97 49 100 29];
+            app.EstimateButton.Position = [179 41 100 29];
             app.EstimateButton.Text = 'Estimate';
 
             % Create PlottingStatusLampLabel
@@ -639,6 +643,27 @@ classdef basic_exported < matlab.apps.AppBase
             app.ButtonTask3 = uitogglebutton(app.SelectTaskButtonGroup);
             app.ButtonTask3.Text = '3';
             app.ButtonTask3.Position = [190 5 51 22];
+
+            % Create SelectedNeedleControlsButtonGroup
+            app.SelectedNeedleControlsButtonGroup = uibuttongroup(app.PlotControlsTab);
+            app.SelectedNeedleControlsButtonGroup.Title = 'Selected Needle Controls';
+            app.SelectedNeedleControlsButtonGroup.Position = [7 3 157 106];
+
+            % Create DonothingButton
+            app.DonothingButton = uitogglebutton(app.SelectedNeedleControlsButtonGroup);
+            app.DonothingButton.Text = 'Do nothing';
+            app.DonothingButton.Position = [9 55 138 22];
+            app.DonothingButton.Value = true;
+
+            % Create HighlightclosestButton
+            app.HighlightclosestButton = uitogglebutton(app.SelectedNeedleControlsButtonGroup);
+            app.HighlightclosestButton.Text = 'Highlight closest';
+            app.HighlightclosestButton.Position = [9 32 137 22];
+
+            % Create HighlightsimilaranglesButton
+            app.HighlightsimilaranglesButton = uitogglebutton(app.SelectedNeedleControlsButtonGroup);
+            app.HighlightsimilaranglesButton.Text = 'Highlight similar angles';
+            app.HighlightsimilaranglesButton.Position = [9 9 137 22];
 
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
