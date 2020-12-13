@@ -73,23 +73,27 @@ classdef basic_exported < matlab.apps.AppBase
 		SL							    % Length of shape
         Similar =   3                   % Number of similar needles
         
-        % Custom variables
+        % Customisation variables
         uiGridlineWidth =   1
         uiGridlineColor = [0 0 0]
         uiSelectedPolyColor = [0 0 1]
         uiIntersectPolyColor = [1 0 0]
         uiNonIntersectPolyColor = [0 1 0]
         uiSimilarPolyColor = [0.72 0.27 1.0]
+        
+        % Task state of UI
         currentTask = 1
 		
-		% Patch object
+		% Patch & plot objects
 		pat
         plt
         plti
         
+        % Grid line objects for ui customisation
         gridlinesH
         gridlinesV
         
+        % State information for the needle interactivity
         lastClickedLine
         lastClickedLineColor = [0 0 0]
 		
@@ -100,11 +104,12 @@ classdef basic_exported < matlab.apps.AppBase
 		xcr
 		ycr
         
-		n_angles
-		nxc
-		nyc
-		nxcr
-		nycr
+		n_angles            % Needle rotation angles list
+		nxc                 % Needle x-coord list
+		nyc                 % Needle y-coord list
+		nxcr                % Needle x-coord rotated list
+		nycr                % Needle y-coord rotated list
+        nmd                 % Needle gradient list
     end
     
     methods (Access = private)
@@ -191,6 +196,7 @@ classdef basic_exported < matlab.apps.AppBase
 			updateSquareRanomisation(app);
 			updatePlotFloor(app);
 			
+            % Calculate rotated square angles
             rad = app.SL / 2;
 			app.xcr = [...
 				rad * cosd(app.sq_angles) + rad * sind(app.sq_angles) + app.xc;...
