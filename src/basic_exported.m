@@ -161,27 +161,42 @@ classdef basic_exported < matlab.apps.AppBase
 			app.n_angles = rand(1, app.N) * 360;
 			app.nxc = app.SL + rand(1, app.N) * (app.S - 2 * app.SL);
 			app.nyc = app.SL + rand(1, app.N) * (app.S - 2 * app.SL);
-		end
+        end
+        
+        function workOutNeedleGradients(app)
+            app.nmd = 1:app.N;
+            for i = 1:app.N
+                app.nmd(i) = (app.nyc - app.nycr(i)) / (app.nxc - app.nxcr(i));
+            end
+            
+            app.nmd
+        end
 		
 		function updateNeedlePlot(app)
 			UIDoClearAxes(app);
 			updateNeedleRanomisation(app);
 			
+            % Calculate rotated coordinates
 			app.nxcr = app.nxc + app.SL * cosd(app.n_angles);
 			app.nycr = app.nyc + app.SL * sind(app.n_angles);
 			
 			calculateNeedlePi(app);
+            workOutNeedleGradients(app);
             
+            % Find those that intersect either a y-line or x-line
 			intersecting = (floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)) | (floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
 			
+            % Plot needles
             hold(app.UIAxes, 'on');
             app.plt = plot(app.UIAxes, [app.nxc(intersecting); app.nxcr(intersecting)], [app.nyc(intersecting); app.nycr(intersecting)], 'LineWidth', 2, 'Color', app.uiIntersectPolyColor);
             app.plti = plot(app.UIAxes, [app.nxc(~intersecting); app.nxcr(~intersecting)], [app.nyc(~intersecting); app.nycr(~intersecting)], 'LineWidth', 2, 'Color', app.uiNonIntersectPolyColor);
             hold(app.UIAxes, 'off');
             
+            % Assign callbacks for needle interaction
 			set(app.plt, 'ButtonDownFcn', @app.LineSelected);
 			set(app.plti, 'ButtonDownFcn', @app.LineSelected);
 			
+            % Plot gridlines
 			updatePlotFloor(app);
 		end
 		
@@ -211,15 +226,18 @@ classdef basic_exported < matlab.apps.AppBase
 				rad * sind(app.sq_angles) + rad * cosd(app.sq_angles) + app.yc;...
 			];
 			
+            % Figure out what we are estimating
             if app.calc == 1
 			    calculateSquarePi(app);
             else
                 calculateSquareSqrtTwo(app);
             end
             
+            % Find squares that intersect
             intersecting = floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
                 floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV);
 			
+            % Plot the squares
 			app.pat = patch(app.UIAxes, app.xcr(:,intersecting), app.ycr(:,intersecting), 'w', 'EdgeColor', app.uiIntersectPolyColor);
             app.pat = [app.pat, patch(app.UIAxes, app.xcr(:,~intersecting), app.ycr(:,~intersecting), 'w', 'EdgeColor', app.uiNonIntersectPolyColor)];
 		end
@@ -237,6 +255,7 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function calculateSquarePi(app)
+            % Count total number of intersections
 			n = 0;
 			n = n + sum(floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV)) + ...
 					sum(floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV)) + ...
@@ -252,9 +271,11 @@ classdef basic_exported < matlab.apps.AppBase
         end
 		
 		function calculateSquareSqrtTwo(app)
+            % Calculate total intersections
             total_intersected = sum(floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
                 floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV));
             
+            % Calculate consequtive side intersections
             total_consequtive = 0;
             total_consequtive = total_consequtive + sum((floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV)) & (floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV))) + ...
                 sum((floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV)) & (floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV)));
@@ -284,11 +305,15 @@ classdef basic_exported < matlab.apps.AppBase
                 return;
             end
             
-            disp(app.lastClickedLine);
-            xd = app.lastClickedLine.XData
-            yd = app.lastClickedLine.YData
+            xd = app.lastClickedLine.XData;
+            yd = app.lastClickedLine.YData;
             
-            md = (yd(1) + yd(2)) / (xd(1) + xd(2))
+            % Calculate gradient for this line
+            md = (yd(1) - yd(2)) / (xd(1) - xd(2))
+            
+            % Compare to other lines
+            
+            % Highlight n similar lines
             
             
         end
