@@ -319,7 +319,6 @@ classdef basic_exported < matlab.apps.AppBase
             md = (yd(1) - yd(2)) / (xd(1) - xd(2));
             
             % Compare to other lines
-            app.nmd
             diff = app.nmd - md;
             absdiff = abs(diff);
             absdiffsorted = sort(absdiff);
@@ -347,14 +346,21 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.SelectedNeedleControlsButtonGroup, 'Enable', 'off');
             set(app.roottwoButton, 'Enable', false);
             set(app.NeedlesButton, 'Enable', false);
+            set(app.SquaresButton, 'Enable', true);
             
             if newTaskNo == 1
                 set(app.NumberoffloorplanksSliderLabel, 'Text', 'Number of floor planks...');
+				
+				set(app.SquaresButton, 'Value', true);
+				UIUpdateEstimationItem(app, 'Squares');
             end
             
             if newTaskNo == 2
                 set(app.roottwoButton, 'Enable', true);
                 set(app.NumberoffloorplanksSliderLabel, 'Text', 'Number of floor planks...');
+				
+				set(app.SquaresButton, 'Value', true);
+				UIUpdateEstimationItem(app, 'Squares');
             end
             
             if newTaskNo == 3
@@ -362,6 +368,11 @@ classdef basic_exported < matlab.apps.AppBase
                 set(app.NHorizontalTilesSlider, 'Visible', true);
                 set(app.NHorizontalTilesSliderLabel, 'Visible', true);
                 set(app.SelectedNeedleControlsButtonGroup, 'Enable', 'on');
+				set(app.piButton, 'Value', true);
+				
+				set(app.SquaresButton, 'Enable', false);
+				set(app.NeedlesButton, 'Value', true);
+				UIUpdateEstimationItem(app, 'Needles');
                 
                 set(app.NumberoffloorplanksSliderLabel, 'Text', 'M (Verticle tiles)');
             end
@@ -427,7 +438,7 @@ classdef basic_exported < matlab.apps.AppBase
                     c = c+1;
 					app.gridlinesH(c) = yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
                 end
-            end
+			end
 		end
 	end
 
@@ -740,7 +751,7 @@ classdef basic_exported < matlab.apps.AppBase
             app.WarningSquarelengthPlankdistanceLabel = uilabel(app.PlotControlsTab);
             app.WarningSquarelengthPlankdistanceLabel.FontColor = [1 0 0];
             app.WarningSquarelengthPlankdistanceLabel.Visible = 'off';
-            app.WarningSquarelengthPlankdistanceLabel.Position = [25 187 228 22];
+            app.WarningSquarelengthPlankdistanceLabel.Position = [25 180 228 22];
             app.WarningSquarelengthPlankdistanceLabel.Text = 'Warning! Square length > Plank distance ';
 
             % Create NHorizontalTilesSliderLabel
