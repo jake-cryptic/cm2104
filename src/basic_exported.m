@@ -65,12 +65,13 @@ classdef basic_exported < matlab.apps.AppBase
     properties (Access = private)
 		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
         S	    =	1					% Scale factor
-        N	    =	200			     % Number of shapes
+        N	    =	200			        % Number of shapes
 		NoVP	=	5				    % Number of planks
         NoHP    =   5                   % Number of horizontal planks
 		DV							    % Distance between vertical planks
 		DH							    % Distance between horizontal planks
 		SL							    % Length of shape
+        Similar =   3                   % Number of similar needles
         
         % Custom variables
         uiGridlineWidth =   1
@@ -256,7 +257,35 @@ classdef basic_exported < matlab.apps.AppBase
 			
 			rt_estimate = 2 - total_con_over_int;
 			UIUpdateOutEstimate(app, ['Sqrt(2) Estimate: ' num2str(rt_estimate)]);
-		end
+        end
+        
+        function highlightNeedles(app)
+            rehighlightClosestNeedles(app);
+        end
+        
+        function rehighlightClosestNeedles(app)
+            removeHighlightClosestNeedles(app);
+            highlightClosestNeedles(app);
+        end
+        
+        function removeHighlightClosestNeedles(app)
+            
+        end
+        
+        function highlightClosestNeedles(app)
+            if isempty(app.lastClickedLine)
+                disp('Fuck');
+                return;
+            end
+            
+            disp(app.lastClickedLine);
+            xd = app.lastClickedLine.XData
+            yd = app.lastClickedLine.YData
+            
+            md = (yd(1) + yd(2)) / (xd(1) + xd(2))
+            
+            
+        end
 		
 		function UIUpdateOutEstimate(app, value)
 			set(app.OutEstimateLabel, 'Text', value);
@@ -270,6 +299,7 @@ classdef basic_exported < matlab.apps.AppBase
         function UIUpdateCurrentTask(app, newTaskNo)
             set(app.NHorizontalTilesSlider, 'Visible', false);
             set(app.NHorizontalTilesSliderLabel, 'Visible', false);
+            set(app.SelectedNeedleControlsButtonGroup, 'Enable', 'off');
             set(app.roottwoButton, 'Enable', false);
             set(app.NeedlesButton, 'Enable', false);
             
@@ -286,6 +316,7 @@ classdef basic_exported < matlab.apps.AppBase
                 set(app.NeedlesButton, 'Enable', true);
                 set(app.NHorizontalTilesSlider, 'Visible', true);
                 set(app.NHorizontalTilesSliderLabel, 'Visible', true);
+                set(app.SelectedNeedleControlsButtonGroup, 'Enable', 'on');
                 
                 set(app.NumberoffloorplanksSliderLabel, 'Text', 'M (Verticle tiles)');
             end
@@ -315,6 +346,7 @@ classdef basic_exported < matlab.apps.AppBase
                 case 'Highlight closest'
                     set(app.nSpinner, 'Visible', true);
                     set(app.nSpinnerLabel, 'Visible', true);
+                    highlightClosestNeedles(app);
                 case 'Do nothing'
                     disp('');
                 case 'Highlight similar angles'
@@ -330,6 +362,8 @@ classdef basic_exported < matlab.apps.AppBase
             app.lastClickedLineColor = get(src, 'Color');
             app.lastClickedLine = src;
 			set(src, 'Color', app.uiSelectedPolyColor);
+            
+            highlightNeedles(app);
 		end
         
 		function updatePlotFloor(app)
@@ -343,13 +377,11 @@ classdef basic_exported < matlab.apps.AppBase
 			if app.currentTask == 3
                 app.gridlinesH = 1:app.NoHP+1;
                 c = 0;
-				for i = 0:app.DH:app.S
+                for i = 0:app.DH:app.S
                     c = c+1;
 					app.gridlinesH(c) = yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
                 end
-			end
-            app.gridlinesH
-            app.gridlinesV
+            end
 		end
 	end
 
@@ -517,6 +549,13 @@ classdef basic_exported < matlab.apps.AppBase
             selectedButton = app.SelectedNeedleControlsButtonGroup.SelectedObject;
             
             UIChangeNeedleSelections(app, selectedButton.Text);
+        end
+
+        % Value changed function: nSpinner
+        function nSpinnerValueChanged(app, event)
+            value = app.nSpinner.Value;
+            app.Similar = value;
+            rehighlightClosestNeedles(app);
         end
     end
 
@@ -701,6 +740,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create SelectedNeedleControlsButtonGroup
             app.SelectedNeedleControlsButtonGroup = uibuttongroup(app.PlotControlsTab);
             app.SelectedNeedleControlsButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @SelectedNeedleControlsButtonGroupSelectionChanged, true);
+            app.SelectedNeedleControlsButtonGroup.Enable = 'off';
             app.SelectedNeedleControlsButtonGroup.Title = 'Selected Needle Controls';
             app.SelectedNeedleControlsButtonGroup.Position = [7 3 157 106];
 
@@ -729,8 +769,11 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create nSpinner
             app.nSpinner = uispinner(app.PlotControlsTab);
+            app.nSpinner.Limits = [1 100];
+            app.nSpinner.ValueChangedFcn = createCallbackFcn(app, @nSpinnerValueChanged, true);
             app.nSpinner.Visible = 'off';
             app.nSpinner.Position = [236 87 43 22];
+            app.nSpinner.Value = 3;
 
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
