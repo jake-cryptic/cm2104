@@ -146,7 +146,6 @@ classdef basic_exported < matlab.apps.AppBase
 			
             app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2);
 			updatePlotFloor(app);
-			updatePlotGrid(app);
 		end
 		
 		function updateSquareRanomisation(app)
@@ -188,12 +187,17 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function calculateNeedlePi(app)
-			n = 0;
-			n = n + sum(floor(app.nxc / app.SL) ~= floor(app.nxcr / app.SL));
-            
-			t = 2 * app.N * app.SL;
 			
-			pi_estimate = t / (n * app.DV);
+			[floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV); floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)]
+			
+			n = 0;
+			n = n + sum(floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
+			
+			p = (n/app.N)
+			a = app.NoHP;
+			b = app.NoVP;
+			
+			pi_estimate = (2 * (a + b) - app.SL^2) / (p * a * b);
 			UIUpdateOutEstimate(app, ['Needle Pi Estimate: ' num2str(pi_estimate)]);
 		end
 		
@@ -202,7 +206,7 @@ classdef basic_exported < matlab.apps.AppBase
 			n = n + sum(floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV)) + ...
 					sum(floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV)) + ...
 					sum(floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV)) + ...
-					sum(floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV))
+					sum(floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV));
             
             %sqi = [floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV); floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV); floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV); floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV)]'
             
@@ -259,6 +263,7 @@ classdef basic_exported < matlab.apps.AppBase
             end
             
             app.currentTask = newTaskNo;
+			beginEstimation(app);
         end
 		
         function UIUpdateEstimationItem(app, item)
@@ -278,11 +283,11 @@ classdef basic_exported < matlab.apps.AppBase
 			for i = 0:app.DV:app.S
 				xline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
 			end
-		end
-		
-		function updatePlotGrid(app)
-            for i = 0:app.DH:app.S
-				yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
+			
+			if app.currentTask == 3
+				for i = 0:app.DH:app.S
+					yline(app.UIAxes, i,  '-', 'LineWidth', app.uiGridlineWidth, 'Color', app.uiGridlineColor);
+				end
 			end
 		end
 	end
@@ -293,6 +298,7 @@ classdef basic_exported < matlab.apps.AppBase
         % Code that executes after component creation
         function startupFcn(app)
 			app.DV	=	app.S / app.NoVP;
+			app.DH	=	app.S / app.NoVP;
 			app.SL	=	app.DV / 2;
         end
 
