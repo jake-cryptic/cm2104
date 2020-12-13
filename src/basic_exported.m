@@ -87,7 +87,6 @@ classdef basic_exported < matlab.apps.AppBase
 		% Patch & plot objects
 		pat
         plt
-        plti
         
         % Grid line objects for ui customisation
         gridlinesH
@@ -168,8 +167,6 @@ classdef basic_exported < matlab.apps.AppBase
             for i = 1:app.N
                 app.nmd(i) = (app.nyc(i) - app.nycr(i)) / (app.nxc(i) - app.nxcr(i));
             end
-            
-            app.nmd
         end
 		
 		function updateNeedlePlot(app)
@@ -188,13 +185,14 @@ classdef basic_exported < matlab.apps.AppBase
 			
             % Plot needles
             hold(app.UIAxes, 'on');
-            app.plt = plot(app.UIAxes, [app.nxc(intersecting); app.nxcr(intersecting)], [app.nyc(intersecting); app.nycr(intersecting)], 'LineWidth', 2, 'Color', app.uiIntersectPolyColor);
-            app.plti = plot(app.UIAxes, [app.nxc(~intersecting); app.nxcr(~intersecting)], [app.nyc(~intersecting); app.nycr(~intersecting)], 'LineWidth', 2, 'Color', app.uiNonIntersectPolyColor);
+            app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2, 'Color', app.uiIntersectPolyColor);
             hold(app.UIAxes, 'off');
+            
+            % Change color of those who do not intersect
+            set(app.plt(~intersecting), 'Color', app.uiNonIntersectPolyColor);
             
             % Assign callbacks for needle interaction
 			set(app.plt, 'ButtonDownFcn', @app.LineSelected);
-			set(app.plti, 'ButtonDownFcn', @app.LineSelected);
 			
             % Plot gridlines
 			updatePlotFloor(app);
@@ -312,14 +310,20 @@ classdef basic_exported < matlab.apps.AppBase
             md = (yd(1) - yd(2)) / (xd(1) - xd(2))
             
             % Compare to other lines
-            sorted_md = sort(app.nmd);
-            for i = 1:app.Similar
-                
-            end
+            app.nmd
+            diff = app.nmd - md
+            absdiff = abs(diff)
+            absdiffsorted = sort(absdiff);
+            nsim = absdiffsorted(1:app.Similar)
+            pos = ismember(absdiff, nsim);
+            
+            simxc = app.xc(pos)
+            simxcr = app.xcr(pos)
+            simyc = app.yc(pos)
+            simycr = app.ycr(pos)
             
             % Highlight n similar lines
-            
-            
+            set(app.plt(pos), 'Color', app.uiSimilarPolyColor);
         end
 		
 		function UIUpdateOutEstimate(app, value)
