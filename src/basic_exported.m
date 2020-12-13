@@ -191,9 +191,15 @@ classdef basic_exported < matlab.apps.AppBase
 			[floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV); floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)]
 			
 			n = 0;
-			n = n + sum(floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
+			n = n + sum(floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV))
 			
-			p = (n/app.N)
+			nn = 0;
+			nn = nn + sum(floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH))
+			
+			nnn = 0;
+			nnn = nnn + sum((floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)) | floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV))
+		
+			p = (nnn/app.N)
 			a = app.NoHP;
 			b = app.NoVP;
 			
