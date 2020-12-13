@@ -43,10 +43,12 @@ classdef basic_exported < matlab.apps.AppBase
         CurrentShapeColourNonIntersect  matlab.ui.control.Lamp
         ModifyShapeColourIntersectButton  matlab.ui.control.Button
         CurrentShapeColourIntersect     matlab.ui.control.Lamp
-        ModifyGridLineColorButton       matlab.ui.control.Button
+        ModifyGridLineColourButton      matlab.ui.control.Button
         CurrentGridLineColour           matlab.ui.control.Lamp
         GridLineThicknessSpinnerLabel   matlab.ui.control.Label
         GridLineThicknessSpinner        matlab.ui.control.Spinner
+        ModifyShapeColourSelectedButton  matlab.ui.control.Button
+        CurrentShapeColourSelected      matlab.ui.control.Lamp
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
     end
@@ -65,6 +67,9 @@ classdef basic_exported < matlab.apps.AppBase
         % Custom variables
         uiGridlineWidth =   1
         uiGridlineColor = [0 0 0]
+        uiSelectedPolyColor = [0 0 1]
+        uiIntersectPolyColor = [1 0 0]
+        uiNonIntersectPolyColor = [0 1 0]
         currentTask = 1
 		
 		% Patch object
@@ -288,7 +293,6 @@ classdef basic_exported < matlab.apps.AppBase
             
             app.lastClickedLine = src;
 			set(src, 'Color', 'green');
-			%set(app.plt(plt ~= ObjectH), 'LineWidth', 0.5);
 		end
         
 		function updatePlotFloor(app)
@@ -368,8 +372,8 @@ classdef basic_exported < matlab.apps.AppBase
 			updateItemLength(app, minVal / 10);
         end
 
-        % Button pushed function: ModifyGridLineColorButton
-        function ModifyGridLineColorButtonPushed(app, event)
+        % Button pushed function: ModifyGridLineColourButton
+        function ModifyGridLineColourButtonPushed(app, event)
             c = uisetcolor([0 0 0], 'Change grid line colour');
             
             app.uiGridlineColor = c;
@@ -426,14 +430,26 @@ classdef basic_exported < matlab.apps.AppBase
         % Button pushed function: ModifyShapeColourIntersectButton
         function ModifyShapeColourIntersectButtonPushed(app, event)
             c = uisetcolor([0 0 0], 'Change intersecting shape colour');
-			set(app.CurrentShapeColourIntersect, 'Color', '#0f0');
+			set(app.CurrentShapeColourIntersect, 'Color', c);
+            
+            app.uiIntersectPolyColor = c;
         end
 
         % Button pushed function: 
         % ModifyShapeColourNonIntersectButton
         function ModifyShapeColourNonIntersectButtonPushed(app, event)
             c = uisetcolor([0 0 0], 'Change non-intersecting shape colour');
-			set(app.CurrentShapeColourNonIntersect, 'Color', '#f00');
+			set(app.CurrentShapeColourNonIntersect, 'Color', c);
+            
+            app.uiNonIntersectPolyColor = c;
+        end
+
+        % Button pushed function: ModifyShapeColourSelectedButton
+        function ModifyShapeColourSelectedButtonPushed(app, event)
+            c = uisetcolor([0 0 0], 'Change selected needle colour');
+			set(app.CurrentShapeColourSelected, 'Color', c);
+            
+            app.uiSelectedPolyColor = c;
         end
     end
 
@@ -672,47 +688,58 @@ classdef basic_exported < matlab.apps.AppBase
             % Create ModifyShapeColourNonIntersectButton
             app.ModifyShapeColourNonIntersectButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourNonIntersectButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourNonIntersectButtonPushed, true);
-            app.ModifyShapeColourNonIntersectButton.Position = [47 368 229 22];
+            app.ModifyShapeColourNonIntersectButton.Position = [47 336 229 22];
             app.ModifyShapeColourNonIntersectButton.Text = 'Modify Non-intersecting Polygon Colour';
 
             % Create CurrentShapeColourNonIntersect
             app.CurrentShapeColourNonIntersect = uilamp(app.FigureTab);
-            app.CurrentShapeColourNonIntersect.Position = [16 367 25 25];
+            app.CurrentShapeColourNonIntersect.Position = [16 335 25 25];
             app.CurrentShapeColourNonIntersect.Color = [1 0 0];
 
             % Create ModifyShapeColourIntersectButton
             app.ModifyShapeColourIntersectButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourIntersectButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourIntersectButtonPushed, true);
-            app.ModifyShapeColourIntersectButton.Position = [60 402 204 22];
+            app.ModifyShapeColourIntersectButton.Position = [60 370 204 22];
             app.ModifyShapeColourIntersectButton.Text = 'Modify Intersecting Polygon Colour';
 
             % Create CurrentShapeColourIntersect
             app.CurrentShapeColourIntersect = uilamp(app.FigureTab);
-            app.CurrentShapeColourIntersect.Position = [15 402 25 25];
+            app.CurrentShapeColourIntersect.Position = [15 370 25 25];
 
-            % Create ModifyGridLineColorButton
-            app.ModifyGridLineColorButton = uibutton(app.FigureTab, 'push');
-            app.ModifyGridLineColorButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyGridLineColorButtonPushed, true);
-            app.ModifyGridLineColorButton.Position = [94 436 137 22];
-            app.ModifyGridLineColorButton.Text = 'Modify Grid Line Color';
+            % Create ModifyGridLineColourButton
+            app.ModifyGridLineColourButton = uibutton(app.FigureTab, 'push');
+            app.ModifyGridLineColourButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyGridLineColourButtonPushed, true);
+            app.ModifyGridLineColourButton.Position = [92 404 142 22];
+            app.ModifyGridLineColourButton.Text = 'Modify Grid Line Colour';
 
             % Create CurrentGridLineColour
             app.CurrentGridLineColour = uilamp(app.FigureTab);
-            app.CurrentGridLineColour.Position = [15 435 25 25];
+            app.CurrentGridLineColour.Position = [15 403 25 25];
             app.CurrentGridLineColour.Color = [0 0 0];
 
             % Create GridLineThicknessSpinnerLabel
             app.GridLineThicknessSpinnerLabel = uilabel(app.FigureTab);
             app.GridLineThicknessSpinnerLabel.HorizontalAlignment = 'right';
-            app.GridLineThicknessSpinnerLabel.Position = [23 332 111 22];
+            app.GridLineThicknessSpinnerLabel.Position = [31 437 111 22];
             app.GridLineThicknessSpinnerLabel.Text = 'Grid Line Thickness';
 
             % Create GridLineThicknessSpinner
             app.GridLineThicknessSpinner = uispinner(app.FigureTab);
             app.GridLineThicknessSpinner.Limits = [1 5];
             app.GridLineThicknessSpinner.ValueChangedFcn = createCallbackFcn(app, @GridLineThicknessSpinnerValueChanged, true);
-            app.GridLineThicknessSpinner.Position = [149 332 100 22];
+            app.GridLineThicknessSpinner.Position = [157 437 100 22];
             app.GridLineThicknessSpinner.Value = 1;
+
+            % Create ModifyShapeColourSelectedButton
+            app.ModifyShapeColourSelectedButton = uibutton(app.FigureTab, 'push');
+            app.ModifyShapeColourSelectedButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourSelectedButtonPushed, true);
+            app.ModifyShapeColourSelectedButton.Position = [72 302 181 22];
+            app.ModifyShapeColourSelectedButton.Text = 'Modify Selected Needle Colour';
+
+            % Create CurrentShapeColourSelected
+            app.CurrentShapeColourSelected = uilamp(app.FigureTab);
+            app.CurrentShapeColourSelected.Position = [16 301 25 25];
+            app.CurrentShapeColourSelected.Color = [0 0 1];
 
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.UIFigure);
