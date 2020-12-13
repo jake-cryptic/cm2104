@@ -75,7 +75,9 @@ classdef basic_exported < matlab.apps.AppBase
 		% Patch object
 		pat
         plt
+        plti
         lastClickedLine
+        lastClickedLineColor = [0 0 0]
 		
 		% State variables
 		sq_angles
@@ -150,10 +152,16 @@ classdef basic_exported < matlab.apps.AppBase
 			app.nycr = app.nyc + app.SL * sind(app.n_angles);
 			
 			calculateNeedlePi(app);
+            
+			intersecting = (floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)) | (floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
 			
-            app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2, 'Color', 'r');
-			
-			set(app.plt, 'ButtonDownFcn', @app.LineSelected); % , app.plt}
+            hold(app.UIAxes, 'on');
+            app.plt = plot(app.UIAxes, [app.nxc(intersecting); app.nxcr(intersecting)], [app.nyc(intersecting); app.nycr(intersecting)], 'LineWidth', 2, 'Color', app.uiIntersectPolyColor);
+            app.plti = plot(app.UIAxes, [app.nxc(~intersecting); app.nxcr(~intersecting)], [app.nyc(~intersecting); app.nycr(~intersecting)], 'LineWidth', 2, 'Color', app.uiNonIntersectPolyColor);
+            hold(app.UIAxes, 'off');
+            
+			set(app.plt, 'ButtonDownFcn', @app.LineSelected);
+			set(app.plti, 'ButtonDownFcn', @app.LineSelected);
 			
 			updatePlotFloor(app);
 		end
@@ -192,8 +200,8 @@ classdef basic_exported < matlab.apps.AppBase
             intersecting = floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
                 floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV);
 			
-			app.pat = patch(app.UIAxes, app.xcr(:,intersecting), app.ycr(:,intersecting), 'w', 'EdgeColor', 'green');
-            app.pat = [app.pat, patch(app.UIAxes, app.xcr(:,~intersecting), app.ycr(:,~intersecting), 'w', 'EdgeColor', 'red')];
+			app.pat = patch(app.UIAxes, app.xcr(:,intersecting), app.ycr(:,intersecting), 'w', 'EdgeColor', app.uiIntersectPolyColor);
+            app.pat = [app.pat, patch(app.UIAxes, app.xcr(:,~intersecting), app.ycr(:,~intersecting), 'w', 'EdgeColor', app.uiNonIntersectPolyColor)];
 		end
 		
 		function calculateNeedlePi(app)
@@ -288,11 +296,12 @@ classdef basic_exported < matlab.apps.AppBase
 		
 		function LineSelected(app, src, evt)
             if ~isempty(app.lastClickedLine)
-			    set(app.lastClickedLine, 'Color', 'red');
+			    set(app.lastClickedLine, 'Color', app.lastClickedLineColor);
             end
             
+            app.lastClickedLineColor = get(src, 'Color');
             app.lastClickedLine = src;
-			set(src, 'Color', 'green');
+			set(src, 'Color', app.uiSelectedPolyColor);
 		end
         
 		function updatePlotFloor(app)
