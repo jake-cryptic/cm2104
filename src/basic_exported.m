@@ -54,7 +54,7 @@ classdef basic_exported < matlab.apps.AppBase
     properties (Access = private)
 		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
         S	    =	1					% Scale factor
-        N	    =	2			     % Number of shapes
+        N	    =	200			     % Number of shapes
 		NoVP	=	5				    % Number of planks
         NoHP    =   5                   % Number of horizontal planks
 		DV							    % Distance between vertical planks
@@ -145,6 +145,9 @@ classdef basic_exported < matlab.apps.AppBase
 			calculateNeedlePi(app);
 			
             app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2);
+			
+			set(app.plt, 'ButtonDownFcn', {@app.LineSelected, app.plt});
+			
 			updatePlotFloor(app);
 		end
 		
@@ -203,7 +206,7 @@ classdef basic_exported < matlab.apps.AppBase
 			a = app.NoHP;
 			b = app.NoVP;
 			
-			pi_estimate = (2 * (a + b) - app.SL^2) / (p * a * b);
+			pi_estimate = ((2 * app.SL * (a + b)) - app.SL^2) / (p * a * b);
 			UIUpdateOutEstimate(app, ['Needle Pi Estimate: ' num2str(pi_estimate)]);
 		end
 		
@@ -283,7 +286,12 @@ classdef basic_exported < matlab.apps.AppBase
             
             set(app.NumberofsquaresSpinnerLabel, 'Text', spinnerText);
             set(app.LengthofsquaresidesSliderLabel, 'Text', lengthText);
-        end
+		end
+		
+		function LineSelected(src, ~)
+			set(src, 'LineWidth', 2.5);
+			%set(app.plt(plt ~= ObjectH), 'LineWidth', 0.5);
+		end
         
 		function updatePlotFloor(app)
 			for i = 0:app.DV:app.S
