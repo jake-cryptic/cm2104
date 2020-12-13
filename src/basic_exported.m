@@ -70,6 +70,7 @@ classdef basic_exported < matlab.apps.AppBase
 		% Patch object
 		pat
         plt
+        lastClickedLine
 		
 		% State variables
 		sq_angles
@@ -145,9 +146,9 @@ classdef basic_exported < matlab.apps.AppBase
 			
 			calculateNeedlePi(app);
 			
-            app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2);
+            app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2, 'Color', 'r');
 			
-			set(app.plt, 'ButtonDownFcn', {@app.LineSelected, app.plt});
+			set(app.plt, 'ButtonDownFcn', @app.LineSelected); % , app.plt}
 			
 			updatePlotFloor(app);
 		end
@@ -280,9 +281,13 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.LengthofsquaresidesSliderLabel, 'Text', lengthText);
 		end
 		
-		function LineSelected(src, ~)
-            disp('CLICKED')
-			set(src, 'LineWidth', 2.5);
+		function LineSelected(app, src, evt)
+            if ~isempty(app.lastClickedLine)
+			    set(app.lastClickedLine, 'Color', 'red');
+            end
+            
+            app.lastClickedLine = src;
+			set(src, 'Color', 'green');
 			%set(app.plt(plt ~= ObjectH), 'LineWidth', 0.5);
 		end
         
