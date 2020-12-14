@@ -233,6 +233,14 @@ classdef basic_exported < matlab.apps.AppBase
 		function updateNeedlePlot(app)
 			UIDoClearAxes(app);
 			
+			calculateNeedles(app);
+            
+			workOutNeedleGradients(app);
+            
+            plotNeedles(app);
+		end
+		
+		function calculateNeedles(app)
 			if app.currentTask == 3
 				updateNeedleRanomisation(app);
 				calculateNeedlePi(app);
@@ -240,10 +248,6 @@ classdef basic_exported < matlab.apps.AppBase
 				updateRandomLengthNeedleRanomisation(app);
 				calculateRandomLengthNeedlePi(app);
 			end
-            
-			workOutNeedleGradients(app);
-            
-            plotNeedles(app);
 		end
 		
 		function plotNeedles(app)
@@ -295,15 +299,19 @@ classdef basic_exported < matlab.apps.AppBase
 				rad * sind(app.sq_angles) - rad * cosd(app.sq_angles) + app.yc;...
 				rad * sind(app.sq_angles) + rad * cosd(app.sq_angles) + app.yc;...
 			];
+            
+			calculateSquares(app);
 			
-            % Figure out what we are estimating
+			plotSquares(app);
+		end
+		
+		function calculateSquares(app)
+			% Figure out what we are estimating
             if app.calc == 1
 			    calculateSquarePi(app);
             else
                 calculateSquareSqrtTwo(app);
-            end
-            
-			plotSquares(app);
+			end
 		end
 		
 		function plotSquares(app)
@@ -380,7 +388,7 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function saveCurrentNeedles(app)
-			file_name = ['needles_' char(randi([65 90],1,4)) '_task' app.currentTask '.mat'];
+			file_name = ['needles_' char(randi([65 90],1,4)) '_task.mat'];
 			
 			[file, path, ~] = uiputfile('*.mat', 'Save Needles...', file_name);
 			
@@ -395,6 +403,7 @@ classdef basic_exported < matlab.apps.AppBase
 			% What are we saving?
 			ct = app.currentTask;
 			tn = app.N;
+			cv = app.calc;
 			
 			%sq_angles
 			%n_angles
@@ -414,7 +423,7 @@ classdef basic_exported < matlab.apps.AppBase
 			end
 			
 			% Complete the save
-			save(filepath, 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snmd');
+			save(filepath, 'cv', 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snmd');
 		end
 		
 		function loadNewNeedles(app)
@@ -425,9 +434,10 @@ classdef basic_exported < matlab.apps.AppBase
 				return;
 			end
 			
-			load(fullfile(path, file), 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snmd');
+			load(fullfile(path, file), 'cv', 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snmd');
 			
 			% What are we loading?
+			app.calc = cv;
 			if app.overwriteOnImport == true
 				app.N = tn;
 				if ct ~= 3
@@ -473,8 +483,10 @@ classdef basic_exported < matlab.apps.AppBase
 			end
 			
 			if ct ~= 3
+				calculateSquares(app);
 				plotSquares(app);
 			else
+				calculateNeedles(app);
 				plotNeedles(app);
 			end
 		end
@@ -587,8 +599,6 @@ classdef basic_exported < matlab.apps.AppBase
 				set(app.NeedlesButton, 'Value', true);
 				UIUpdateEstimationItem(app, 'Needles');
 			end
-			
-			beginEstimation(app);
         end
 		
         function UIUpdateEstimationItem(app, item)
@@ -773,6 +783,8 @@ classdef basic_exported < matlab.apps.AppBase
         function SelectTaskButtonGroupSelectionChanged(app, event)
             selectedButton = app.SelectTaskButtonGroup.SelectedObject;
             UIUpdateCurrentTask(app, str2num(selectedButton.Text));
+			
+			beginEstimation(app);
         end
 
         % Selection changed function: EstimatevalueusingButtonGroup
