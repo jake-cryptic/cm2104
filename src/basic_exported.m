@@ -189,8 +189,8 @@ classdef basic_exported < matlab.apps.AppBase
 			app.n_angles = rand(1, app.N) * 360;
 			
 			% Calculate starting coordinates
-			app.nxc = app.SL + rand(1, app.N) * (app.S - 2 * app.SL);
-			app.nyc = app.SL + rand(1, app.N) * (app.S - 2 * app.SL);
+			app.nxc = rand(1, app.N);
+			app.nyc = rand(1, app.N);
 			
 			% Calculate rotated end coordinates
 			app.nxcr = app.nxc + app.SL * cosd(app.n_angles);
@@ -364,6 +364,10 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function saveCurrentNeedles(app)
+			f = uiputfile();
+		end
+		
+		function loadNewNeedles(app)
 			
 		end
         
@@ -768,6 +772,11 @@ classdef basic_exported < matlab.apps.AppBase
 			app.uiNeedleLineWidth = value;
             set(app.plt, 'LineWidth', value);
         end
+
+        % Button pushed function: LoadExportedNeedlesButton
+        function LoadExportedNeedlesButtonPushed(app, event)
+            loadNewNeedles(app);
+        end
     end
 
     % Component initialization
@@ -986,7 +995,7 @@ classdef basic_exported < matlab.apps.AppBase
             app.nSpinner.Limits = [1 100];
             app.nSpinner.ValueChangedFcn = createCallbackFcn(app, @nSpinnerValueChanged, true);
             app.nSpinner.Visible = 'off';
-            app.nSpinner.Position = [236 87 43 22];
+            app.nSpinner.Position = [229 87 50 22];
             app.nSpinner.Value = 3;
 
             % Create MinimumlengthofneedlesLabel
@@ -1174,6 +1183,7 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create LoadExportedNeedlesButton
             app.LoadExportedNeedlesButton = uibutton(app.FilesTab, 'push');
+            app.LoadExportedNeedlesButton.ButtonPushedFcn = createCallbackFcn(app, @LoadExportedNeedlesButtonPushed, true);
             app.LoadExportedNeedlesButton.Position = [78 248 141 22];
             app.LoadExportedNeedlesButton.Text = 'Load Exported Needles';
 
