@@ -29,6 +29,7 @@ classdef basic_exported < matlab.apps.AppBase
         ButtonTask1                     matlab.ui.control.ToggleButton
         ButtonTask2                     matlab.ui.control.ToggleButton
         ButtonTask3                     matlab.ui.control.ToggleButton
+        ButtonTask3_2                   matlab.ui.control.ToggleButton
         SelectedNeedleControlsButtonGroup  matlab.ui.container.ButtonGroup
         DonothingButton                 matlab.ui.control.ToggleButton
         HighlightsimilaranglesButton    matlab.ui.control.ToggleButton
@@ -57,6 +58,7 @@ classdef basic_exported < matlab.apps.AppBase
         CurrentShapeColourSelected      matlab.ui.control.Lamp
         ModifyShapeColourSimilarButton  matlab.ui.control.Button
         CurrentShapeColourSimilar       matlab.ui.control.Lamp
+        FilesTab                        matlab.ui.container.Tab
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
     end
@@ -65,7 +67,7 @@ classdef basic_exported < matlab.apps.AppBase
     properties (Access = private)
 		calc    =   1                   % What are we calculating? 1 = pi, 2 = sqrt(2)
         S	    =	1					% Scale factor
-        N	    =	200			        % Number of shapes
+        N	    =	750					% Number of shapes
 		NoVP	=	5				    % Number of planks
         NoHP    =   5                   % Number of horizontal planks
 		DV							    % Distance between vertical planks
@@ -528,7 +530,7 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.CurrentGridLineColour, 'Color', c);
             set(app.gridlinesV, 'Color', c);
             
-            if ~isempty(app.gridlinesH) && isvalid(app.gridlinesH)
+            if ~isempty(app.gridlinesH)
                 set(app.gridlinesH, 'Color', c);
             end
         end
@@ -694,7 +696,7 @@ classdef basic_exported < matlab.apps.AppBase
             app.NumberofitemSpinner.ValueChangedFcn = createCallbackFcn(app, @NumberofitemSpinnerValueChanged, true);
             app.NumberofitemSpinner.HorizontalAlignment = 'left';
             app.NumberofitemSpinner.Position = [156 282 142 22];
-            app.NumberofitemSpinner.Value = 1000;
+            app.NumberofitemSpinner.Value = 750;
 
             % Create NumberoffloorplanksSliderLabel
             app.NumberoffloorplanksSliderLabel = uilabel(app.PlotControlsTab);
@@ -804,18 +806,23 @@ classdef basic_exported < matlab.apps.AppBase
             % Create ButtonTask1
             app.ButtonTask1 = uitogglebutton(app.SelectTaskButtonGroup);
             app.ButtonTask1.Text = '1';
-            app.ButtonTask1.Position = [13 5 54 22];
+            app.ButtonTask1.Position = [9 5 54 22];
             app.ButtonTask1.Value = true;
 
             % Create ButtonTask2
             app.ButtonTask2 = uitogglebutton(app.SelectTaskButtonGroup);
             app.ButtonTask2.Text = '2';
-            app.ButtonTask2.Position = [103 5 49 22];
+            app.ButtonTask2.Position = [73 5 49 22];
 
             % Create ButtonTask3
             app.ButtonTask3 = uitogglebutton(app.SelectTaskButtonGroup);
             app.ButtonTask3.Text = '3';
-            app.ButtonTask3.Position = [190 5 51 22];
+            app.ButtonTask3.Position = [133 5 51 22];
+
+            % Create ButtonTask3_2
+            app.ButtonTask3_2 = uitogglebutton(app.SelectTaskButtonGroup);
+            app.ButtonTask3_2.Text = '5';
+            app.ButtonTask3_2.Position = [194 5 51 22];
 
             % Create SelectedNeedleControlsButtonGroup
             app.SelectedNeedleControlsButtonGroup = uibuttongroup(app.PlotControlsTab);
@@ -975,6 +982,10 @@ classdef basic_exported < matlab.apps.AppBase
             app.CurrentShapeColourSimilar = uilamp(app.FigureTab);
             app.CurrentShapeColourSimilar.Position = [16 270 25 25];
             app.CurrentShapeColourSimilar.Color = [0.7216 0.2706 1];
+
+            % Create FilesTab
+            app.FilesTab = uitab(app.TabGroup);
+            app.FilesTab.Title = 'Files';
 
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.UIFigure);
