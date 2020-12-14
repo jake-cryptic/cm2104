@@ -76,6 +76,10 @@ classdef basic_exported < matlab.apps.AppBase
 		DV							    % Distance between vertical planks
 		DH							    % Distance between horizontal planks
 		SL							    % Length of shape
+		RS								% Scale factor in matrix form
+		RSL								% Random lengths of shapes
+		RUB								% Upper bound for random lengths
+		RLB								% Lower bount for random lengths
         Similar =   3                   % Number of similar needles
         
         % Customisation variables
@@ -126,7 +130,7 @@ classdef basic_exported < matlab.apps.AppBase
 		function beginEstimation(app)
             if app.currentTask == 1 || app.currentTask == 2
 			    updateSquarePlot(app);
-            else
+			else
                 app.lastClickedLine = [];
                 app.lastClickedLineColor = [0 0 0];
                 
@@ -164,15 +168,42 @@ classdef basic_exported < matlab.apps.AppBase
 		end
         
         function updateItemLength(app, itemLength)
+			if app.currentTask == 5
+				app.RUB = itemLength;
+			else
+				makeWarningForLgtD(app);
+			end
+			
 			app.SL = itemLength;
-            makeWarningForLgtD(app);
 			beginEstimation(app);
         end
         
         function updateNeedleRanomisation(app)
 			app.n_angles = rand(1, app.N) * 360;
+			
+			% Calculate starting coordinates
 			app.nxc = app.SL + rand(1, app.N) * (app.S - 2 * app.SL);
 			app.nyc = app.SL + rand(1, app.N) * (app.S - 2 * app.SL);
+			
+			% Calculate rotated end coordinates
+			app.nxcr = app.nxc + app.SL * cosd(app.n_angles);
+			app.nycr = app.nyc + app.SL * sind(app.n_angles);
+        end
+        
+		function updateRandomLengthNeedleRanomisation(app)
+			app.RS = ones(1, app.N);
+			app.n_angles = rand(1, app.N) * 360;
+			
+			% Random lengths
+			app.RSL = app.RLB + (app.RUB - app.RLB) .* rand(1, app.N);
+			
+			% Calculate starting coordinates
+			app.nxc = app.RSL + rand(1, app.N) .* (app.RS - 2 * app.RSL);
+			app.nyc = app.RSL + rand(1, app.N) .* (app.RS - 2 * app.RSL);
+			
+			% Calculate rotated end coordinates
+			app.nxcr = app.nxc + app.RSL .* cosd(app.n_angles);
+			app.nycr = app.nyc + app.RSL .* sind(app.n_angles);
         end
         
         function workOutNeedleGradients(app)
@@ -184,17 +215,23 @@ classdef basic_exported < matlab.apps.AppBase
 		
 		function updateNeedlePlot(app)
 			UIDoClearAxes(app);
-			updateNeedleRanomisation(app);
 			
-            % Calculate rotated coordinates
-			app.nxcr = app.nxc + app.SL * cosd(app.n_angles);
-			app.nycr = app.nyc + app.SL * sind(app.n_angles);
-			
-			calculateNeedlePi(app);
-            workOutNeedleGradients(app);
+			if app.currentTask == 3
+				updateNeedleRanomisation(app);
+				calculateNeedlePi(app);
+			else
+				updateRandomLengthNeedleRanomisation(app);
+				calculateRandomLengthNeedlePi(app);
+			end
+            
+			workOutNeedleGradients(app);
             
             % Find those that intersect either a y-line or x-line
-			intersecting = (floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)) | (floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
+			if app.currentTask == 3
+				intersecting = (floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)) | (floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
+			else
+				intersecting = (floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
+			end
 			
             % Plot needles
             hold(app.UIAxes, 'on');
@@ -260,6 +297,7 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function calculateNeedlePi(app)
+			% Find intersections on both horizontal and verticle lines
 			n = 0;
 			n = n + sum((floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)) | floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
 		
@@ -267,8 +305,22 @@ classdef basic_exported < matlab.apps.AppBase
 			a = app.DH;
 			b = app.DV;
 			
+			% Use equation from research paper to estimate pi
 			pi_estimate = ((2 * app.SL * (a + b)) - app.SL^2) / (p * a * b);
 			UIUpdateOutEstimate(app, ['Needle Pi Estimate: ' num2str(pi_estimate)]);
+		end
+		
+		function calculateRandomLengthNeedlePi(app)
+			% Calculate the mean needle length
+			L = mean(app.RSL)
+			
+			% Calculate number of intersections
+			n = 0;
+			n = n + sum(floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
+			
+			% Use original buffons needle equation to estimate pi
+			pi_estimate = (2 * L * app.N) / n * app.DV;
+			UIUpdateOutEstimate(app, ['Random Length Needle Pi Estimate: ' num2str(pi_estimate)]);
 		end
 		
 		function calculateSquarePi(app)
@@ -422,7 +474,7 @@ classdef basic_exported < matlab.apps.AppBase
             if strcmp(item, 'Needles')
                 spinnerText = 'Number of Needles...';
 				if app.currentTask == 5
-					lengthText = 'Minimum length of Needles...';
+					lengthText = 'Maximum length of Needles...';
 				else
 					lengthText = 'Length of Needles...';
 				end
@@ -488,6 +540,8 @@ classdef basic_exported < matlab.apps.AppBase
 			app.DV	=	app.S / app.NoVP;
 			app.DH	=	app.S / app.NoVP;
 			app.SL	=	app.DV / 2;
+			app.RUB	=	app.SL;
+			app.RLB	=	app.SL;
         end
 
         % Value changed function: NumberofitemSpinner
@@ -663,6 +717,13 @@ classdef basic_exported < matlab.apps.AppBase
             value = app.nSpinner.Value;
             app.Similar = value;
             rehighlightClosestNeedles(app);
+        end
+
+        % Value changed function: MinLengthOfNeedlesSlider
+        function MinLengthOfNeedlesSliderValueChanged(app, event)
+            value = app.MinLengthOfNeedlesSlider.Value;
+            app.RLB = value;
+			beginEstimation(app);
         end
     end
 
@@ -887,6 +948,7 @@ classdef basic_exported < matlab.apps.AppBase
             app.MinLengthOfNeedlesSlider.Limits = [1 10];
             app.MinLengthOfNeedlesSlider.MajorTicks = [1 2 3 4 5 6 7 8 9 10];
             app.MinLengthOfNeedlesSlider.MajorTickLabels = {'0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'};
+            app.MinLengthOfNeedlesSlider.ValueChangedFcn = createCallbackFcn(app, @MinLengthOfNeedlesSliderValueChanged, true);
             app.MinLengthOfNeedlesSlider.MinorTicks = [];
             app.MinLengthOfNeedlesSlider.Visible = 'off';
             app.MinLengthOfNeedlesSlider.Position = [16 224 267 7];
@@ -1038,7 +1100,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.UIFigure);
             app.OutEstimateLabel.FontSize = 16;
-            app.OutEstimateLabel.Position = [307 29 309 22];
+            app.OutEstimateLabel.Position = [307 29 534 22];
             app.OutEstimateLabel.Text = 'Pi Estimate: N/A';
 
             % Create UIAxes
