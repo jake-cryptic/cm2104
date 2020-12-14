@@ -3,8 +3,7 @@ classdef basic_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         UIFigure                        matlab.ui.Figure
-        UIAxes                          matlab.ui.control.UIAxes
-        OutEstimateLabel                matlab.ui.control.Label
+        GridLayout                      matlab.ui.container.GridLayout
         TabGroup                        matlab.ui.container.TabGroup
         PlotControlsTab                 matlab.ui.container.Tab
         EstimatevalueusingButtonGroup   matlab.ui.container.ButtonGroup
@@ -64,6 +63,8 @@ classdef basic_exported < matlab.apps.AppBase
         FilesTab                        matlab.ui.container.Tab
         LoadExportedNeedlesButton       matlab.ui.control.Button
         SaveCurrentNeedlesButton        matlab.ui.control.Button
+        OutEstimateLabel                matlab.ui.control.Label
+        UIAxes                          matlab.ui.control.UIAxes
     end
 
     
@@ -744,23 +745,18 @@ classdef basic_exported < matlab.apps.AppBase
             app.UIFigure.Position = [100 100 840 518];
             app.UIFigure.Name = 'MATLAB App';
 
-            % Create UIAxes
-            app.UIAxes = uiaxes(app.UIFigure);
-            title(app.UIAxes, 'Floor')
-            xlabel(app.UIAxes, 'X')
-            ylabel(app.UIAxes, 'Y')
-            app.UIAxes.XTick = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
-            app.UIAxes.Position = [301 50 540 469];
-
-            % Create OutEstimateLabel
-            app.OutEstimateLabel = uilabel(app.UIFigure);
-            app.OutEstimateLabel.FontSize = 16;
-            app.OutEstimateLabel.Position = [307 29 534 22];
-            app.OutEstimateLabel.Text = 'Pi Estimate: N/A';
+            % Create GridLayout
+            app.GridLayout = uigridlayout(app.UIFigure);
+            app.GridLayout.ColumnWidth = {'1x', 539.5};
+            app.GridLayout.RowHeight = {469, 22, 27};
+            app.GridLayout.ColumnSpacing = 0;
+            app.GridLayout.RowSpacing = 0;
+            app.GridLayout.Padding = [0 0 0 0];
 
             % Create TabGroup
-            app.TabGroup = uitabgroup(app.UIFigure);
-            app.TabGroup.Position = [1 1 301 518];
+            app.TabGroup = uitabgroup(app.GridLayout);
+            app.TabGroup.Layout.Row = [1 3];
+            app.TabGroup.Layout.Column = 1;
 
             % Create PlotControlsTab
             app.PlotControlsTab = uitab(app.TabGroup);
@@ -1116,6 +1112,22 @@ classdef basic_exported < matlab.apps.AppBase
             app.SaveCurrentNeedlesButton = uibutton(app.FilesTab, 'push');
             app.SaveCurrentNeedlesButton.Position = [84 417 134 22];
             app.SaveCurrentNeedlesButton.Text = 'Save Current Needles';
+
+            % Create OutEstimateLabel
+            app.OutEstimateLabel = uilabel(app.GridLayout);
+            app.OutEstimateLabel.FontSize = 16;
+            app.OutEstimateLabel.Layout.Row = 2;
+            app.OutEstimateLabel.Layout.Column = 2;
+            app.OutEstimateLabel.Text = 'Pi Estimate: N/A';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.GridLayout);
+            title(app.UIAxes, 'Floor')
+            xlabel(app.UIAxes, 'X')
+            ylabel(app.UIAxes, 'Y')
+            app.UIAxes.XTick = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
+            app.UIAxes.Layout.Row = 1;
+            app.UIAxes.Layout.Column = 2;
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
