@@ -58,7 +58,10 @@ classdef basic_exported < matlab.apps.AppBase
         CurrentShapeColourSelected      matlab.ui.control.Lamp
         ModifyShapeColourSimilarButton  matlab.ui.control.Button
         CurrentShapeColourSimilar       matlab.ui.control.Lamp
+        changesReplotWarningLabel       matlab.ui.control.Label
         FilesTab                        matlab.ui.container.Tab
+        LoadExportedNeedlesButton       matlab.ui.control.Button
+        SaveCurrentNeedlesButton        matlab.ui.control.Button
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
     end
@@ -362,6 +365,7 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.roottwoButton, 'Enable', false);
             set(app.NeedlesButton, 'Enable', false);
             set(app.SquaresButton, 'Enable', true);
+			set(app.changesReplotWarningLabel, 'Visible', false);
             
             if newTaskNo == 1
                 set(app.NumberoffloorplanksSliderLabel, 'Text', 'Number of floor planks...');
@@ -589,6 +593,8 @@ classdef basic_exported < matlab.apps.AppBase
             
 			if app.currentTask == 3
 				set(app.plt(app.maskIntersecting), 'Color', c);
+			else
+				set(app.changesReplotWarningLabel, 'Visible', true);
 			end
 			
             app.uiIntersectPolyColor = c;
@@ -602,6 +608,8 @@ classdef basic_exported < matlab.apps.AppBase
             
 			if app.currentTask == 3
 				set(app.plt(~app.maskIntersecting), 'Color', c);
+			else
+				set(app.changesReplotWarningLabel, 'Visible', true);
 			end
 			
             app.uiNonIntersectPolyColor = c;
@@ -983,9 +991,27 @@ classdef basic_exported < matlab.apps.AppBase
             app.CurrentShapeColourSimilar.Position = [16 270 25 25];
             app.CurrentShapeColourSimilar.Color = [0.7216 0.2706 1];
 
+            % Create changesReplotWarningLabel
+            app.changesReplotWarningLabel = uilabel(app.FigureTab);
+            app.changesReplotWarningLabel.FontSize = 11;
+            app.changesReplotWarningLabel.FontColor = [1 0 0];
+            app.changesReplotWarningLabel.Visible = 'off';
+            app.changesReplotWarningLabel.Position = [7 230 313 27];
+            app.changesReplotWarningLabel.Text = '* These changes will be applied once you re-plot the figure';
+
             % Create FilesTab
             app.FilesTab = uitab(app.TabGroup);
             app.FilesTab.Title = 'Files';
+
+            % Create LoadExportedNeedlesButton
+            app.LoadExportedNeedlesButton = uibutton(app.FilesTab, 'push');
+            app.LoadExportedNeedlesButton.Position = [78 248 141 22];
+            app.LoadExportedNeedlesButton.Text = 'Load Exported Needles';
+
+            % Create SaveCurrentNeedlesButton
+            app.SaveCurrentNeedlesButton = uibutton(app.FilesTab, 'push');
+            app.SaveCurrentNeedlesButton.Position = [29 448 134 22];
+            app.SaveCurrentNeedlesButton.Text = 'Save Current Needles';
 
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.UIFigure);
