@@ -37,6 +37,7 @@ classdef basic_exported < matlab.apps.AppBase
         nSpinner                        matlab.ui.control.Spinner
         MinimumlengthofneedlesLabel     matlab.ui.control.Label
         MinLengthOfNeedlesSlider        matlab.ui.control.Slider
+        ClearButton                     matlab.ui.control.Button
         UIControlsTab                   matlab.ui.container.Tab
         TabGroup2                       matlab.ui.container.TabGroup
         OutputTab                       matlab.ui.container.Tab
@@ -732,6 +733,12 @@ classdef basic_exported < matlab.apps.AppBase
 			
 			beginEstimation(app);
         end
+
+        % Button pushed function: ClearButton
+        function ClearButtonPushed(app, event)
+			UIDoClearAxes(app);
+			UIUpdateOutEstimate(app, 'Figure was cleared');
+        end
     end
 
     % Component initialization
@@ -969,6 +976,14 @@ classdef basic_exported < matlab.apps.AppBase
             app.MinLengthOfNeedlesSlider.Visible = 'off';
             app.MinLengthOfNeedlesSlider.Position = [16 224 267 7];
             app.MinLengthOfNeedlesSlider.Value = 1;
+
+            % Create ClearButton
+            app.ClearButton = uibutton(app.PlotControlsTab, 'push');
+            app.ClearButton.ButtonPushedFcn = createCallbackFcn(app, @ClearButtonPushed, true);
+            app.ClearButton.Interruptible = 'off';
+            app.ClearButton.FontSize = 18;
+            app.ClearButton.Position = [179 7 100 29];
+            app.ClearButton.Text = 'Clear';
 
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
