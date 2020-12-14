@@ -81,6 +81,10 @@ classdef basic_exported < matlab.apps.AppBase
         uiNonIntersectPolyColor = [0 1 0]
         uiSimilarPolyColor = [0.72 0.27 1.0]
         
+		% Logical masks for changing plot line colours
+		maskIntersecting
+		maskSimilar
+		
         % Task state of UI
         currentTask = 1
         highlightTask = 0
@@ -198,6 +202,9 @@ classdef basic_exported < matlab.apps.AppBase
             % Assign callbacks for needle interaction
 			set(app.plt, 'ButtonDownFcn', @app.LineSelected);
 			
+			% Set this so we can change colours without re-drawing plot
+			app.maskIntersecting = intersecting;
+			
             % Plot gridlines
 			updatePlotFloor(app);
 		end
@@ -238,6 +245,9 @@ classdef basic_exported < matlab.apps.AppBase
             % Find squares that intersect
             intersecting = floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
                 floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV);
+			
+			% Set this so we can change colours without re-drawing plot
+			app.maskIntersecting = intersecting;
 			
             % Plot the squares
 			app.pat = patch(app.UIAxes, app.xcr(:,intersecting), app.ycr(:,intersecting), 'w', 'EdgeColor', app.uiIntersectPolyColor);
@@ -326,6 +336,9 @@ classdef basic_exported < matlab.apps.AppBase
             % Find similar (we use 2:Similar+1 so as to not select original needle)
             nsim = absdiffsorted(2:(app.Similar+1));
             pos = ismember(absdiff, nsim);
+			
+			% Set this so we can change selected needle colours without re-drawing plot
+			app.maskSimilar = pos;
             
             % Highlight n similar lines
             set(app.plt(pos), 'Color', app.uiSimilarPolyColor);
@@ -515,7 +528,7 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.CurrentGridLineColour, 'Color', c);
             set(app.gridlinesV, 'Color', c);
             
-            if ~isempty(app.gridlinesH)
+            if ~isempty(app.gridlinesH) && isvalid(app.gridlinesH)
                 set(app.gridlinesH, 'Color', c);
             end
         end
@@ -569,34 +582,44 @@ classdef basic_exported < matlab.apps.AppBase
 
         % Button pushed function: ModifyShapeColourIntersectButton
         function ModifyShapeColourIntersectButtonPushed(app, event)
-            c = uisetcolor([0 0 0], 'Change intersecting shape colour');
+            c = uisetcolor([1 0 0], 'Change intersecting shape colour');
 			set(app.CurrentShapeColourIntersect, 'Color', c);
             
+			if app.currentTask == 3
+				set(app.plt(app.maskIntersecting), 'Color', c);
+			end
+			
             app.uiIntersectPolyColor = c;
         end
 
         % Button pushed function: 
         % ModifyShapeColourNonIntersectButton
         function ModifyShapeColourNonIntersectButtonPushed(app, event)
-            c = uisetcolor([0 0 0], 'Change non-intersecting shape colour');
+            c = uisetcolor([0 1 0], 'Change non-intersecting shape colour');
 			set(app.CurrentShapeColourNonIntersect, 'Color', c);
             
+			if app.currentTask == 3
+				set(app.plt(~app.maskIntersecting), 'Color', c);
+			end
+			
             app.uiNonIntersectPolyColor = c;
         end
 
         % Button pushed function: ModifyShapeColourSelectedButton
         function ModifyShapeColourSelectedButtonPushed(app, event)
-            c = uisetcolor([0 0 0], 'Change selected needle colour');
+            c = uisetcolor([0 0 1], 'Change selected needle colour');
 			set(app.CurrentShapeColourSelected, 'Color', c);
-            
+			set(app.lastClickedLine, 'Color', c);
+			
             app.uiSelectedPolyColor = c;
         end
 
         % Button pushed function: ModifyShapeColourSimilarButton
         function ModifyShapeColourSimilarButtonPushed(app, event)
-            c = uisetcolor([0 0 0], 'Change selected needle colour');
+            c = uisetcolor([0.72, 0.27, 1.00], 'Change similar needle colour');
 			set(app.CurrentShapeColourSelected, 'Color', c);
-            
+            set(app.plt(app.maskSimilar), 'Color', c);
+			
             app.uiSimilarPolyColor = c;
         end
 
@@ -895,7 +918,6 @@ classdef basic_exported < matlab.apps.AppBase
             % Create CurrentShapeColourNonIntersect
             app.CurrentShapeColourNonIntersect = uilamp(app.FigureTab);
             app.CurrentShapeColourNonIntersect.Position = [16 335 25 25];
-            app.CurrentShapeColourNonIntersect.Color = [1 0 0];
 
             % Create ModifyShapeColourIntersectButton
             app.ModifyShapeColourIntersectButton = uibutton(app.FigureTab, 'push');
@@ -906,6 +928,7 @@ classdef basic_exported < matlab.apps.AppBase
             % Create CurrentShapeColourIntersect
             app.CurrentShapeColourIntersect = uilamp(app.FigureTab);
             app.CurrentShapeColourIntersect.Position = [15 370 25 25];
+            app.CurrentShapeColourIntersect.Color = [1 0 0];
 
             % Create ModifyGridLineColourButton
             app.ModifyGridLineColourButton = uibutton(app.FigureTab, 'push');
