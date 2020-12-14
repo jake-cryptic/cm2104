@@ -18,8 +18,6 @@ classdef basic_exported < matlab.apps.AppBase
         roottwoButton                   matlab.ui.control.RadioButton
         goldenratioButton               matlab.ui.control.RadioButton
         EstimateButton                  matlab.ui.control.Button
-        PlottingStatusLampLabel         matlab.ui.control.Label
-        PlottingStatusLamp              matlab.ui.control.Lamp
         LengthofsquaresidesSliderLabel  matlab.ui.control.Label
         LengthofitemsidesSlider         matlab.ui.control.Slider
         WarningSquarelengthPlankdistanceLabel  matlab.ui.control.Label
@@ -36,6 +34,8 @@ classdef basic_exported < matlab.apps.AppBase
         HighlightclosestButton          matlab.ui.control.ToggleButton
         nSpinnerLabel                   matlab.ui.control.Label
         nSpinner                        matlab.ui.control.Spinner
+        MinimumlengthofneedlesLabel     matlab.ui.control.Label
+        MinLengthOfNeedlesSlider        matlab.ui.control.Slider
         UIControlsTab                   matlab.ui.container.Tab
         TabGroup2                       matlab.ui.container.TabGroup
         OutputTab                       matlab.ui.container.Tab
@@ -359,6 +359,10 @@ classdef basic_exported < matlab.apps.AppBase
         end
         
         function UIUpdateCurrentTask(app, newTaskNo)
+            app.currentTask = newTaskNo;
+			
+			set(app.MinLengthOfNeedlesSlider, 'Visible', false);
+			set(app.MinimumlengthofneedlesLabel, 'Visible', false);
             set(app.NHorizontalTilesSlider, 'Visible', false);
             set(app.NHorizontalTilesSliderLabel, 'Visible', false);
             set(app.SelectedNeedleControlsButtonGroup, 'Enable', 'off');
@@ -367,22 +371,22 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.SquaresButton, 'Enable', true);
 			set(app.changesReplotWarningLabel, 'Visible', false);
             
-            if newTaskNo == 1
+			if newTaskNo == 1
                 set(app.NumberoffloorplanksSliderLabel, 'Text', 'Number of floor planks...');
 				
 				set(app.SquaresButton, 'Value', true);
 				UIUpdateEstimationItem(app, 'Squares');
-            end
+			end
             
-            if newTaskNo == 2
+			if newTaskNo == 2
                 set(app.roottwoButton, 'Enable', true);
                 set(app.NumberoffloorplanksSliderLabel, 'Text', 'Number of floor planks...');
 				
 				set(app.SquaresButton, 'Value', true);
 				UIUpdateEstimationItem(app, 'Squares');
-            end
+			end
             
-            if newTaskNo == 3
+			if newTaskNo == 3
                 set(app.NeedlesButton, 'Enable', true);
                 set(app.NHorizontalTilesSlider, 'Visible', true);
                 set(app.NHorizontalTilesSliderLabel, 'Visible', true);
@@ -394,9 +398,20 @@ classdef basic_exported < matlab.apps.AppBase
 				UIUpdateEstimationItem(app, 'Needles');
                 
                 set(app.NumberoffloorplanksSliderLabel, 'Text', 'M (Verticle tiles)');
-            end
-            
-            app.currentTask = newTaskNo;
+			end
+			
+			if newTaskNo == 5
+                set(app.NeedlesButton, 'Enable', true);
+                set(app.SelectedNeedleControlsButtonGroup, 'Enable', 'on');
+				set(app.piButton, 'Value', true);
+				set(app.MinLengthOfNeedlesSlider, 'Visible', true);
+				set(app.MinimumlengthofneedlesLabel, 'Visible', true);
+				
+				set(app.SquaresButton, 'Enable', false);
+				set(app.NeedlesButton, 'Value', true);
+				UIUpdateEstimationItem(app, 'Needles');
+			end
+			
 			beginEstimation(app);
         end
 		
@@ -406,7 +421,11 @@ classdef basic_exported < matlab.apps.AppBase
             
             if strcmp(item, 'Needles')
                 spinnerText = 'Number of Needles...';
-                lengthText = 'Length of Needle sides...';
+				if app.currentTask == 5
+					lengthText = 'Minimum length of Needles...';
+				else
+					lengthText = 'Length of Needles...';
+				end
             end
             
             set(app.NumberofsquaresSpinnerLabel, 'Text', spinnerText);
@@ -490,9 +509,7 @@ classdef basic_exported < matlab.apps.AppBase
 
         % Button pushed function: EstimateButton
         function EstimateButtonPushed(app, event)
-			set(app.PlottingStatusLamp, 'Color', '#f00');
 			beginEstimation(app);
-			set(app.PlottingStatusLamp, 'Color', '#0f0');
         end
 
         % Button pushed function: ModifyFontColourButton
@@ -754,20 +771,9 @@ classdef basic_exported < matlab.apps.AppBase
             app.EstimateButton.Position = [179 41 100 29];
             app.EstimateButton.Text = 'Estimate';
 
-            % Create PlottingStatusLampLabel
-            app.PlottingStatusLampLabel = uilabel(app.PlotControlsTab);
-            app.PlottingStatusLampLabel.HorizontalAlignment = 'right';
-            app.PlottingStatusLampLabel.Position = [174 215 83 22];
-            app.PlottingStatusLampLabel.Text = 'Plotting Status';
-
-            % Create PlottingStatusLamp
-            app.PlottingStatusLamp = uilamp(app.PlotControlsTab);
-            app.PlottingStatusLamp.Position = [266 216 20 20];
-
             % Create LengthofsquaresidesSliderLabel
             app.LengthofsquaresidesSliderLabel = uilabel(app.PlotControlsTab);
-            app.LengthofsquaresidesSliderLabel.HorizontalAlignment = 'right';
-            app.LengthofsquaresidesSliderLabel.Position = [6 166 130 22];
+            app.LengthofsquaresidesSliderLabel.Position = [14 166 174 22];
             app.LengthofsquaresidesSliderLabel.Text = 'Length of square sides:';
 
             % Create LengthofitemsidesSlider
@@ -777,7 +783,7 @@ classdef basic_exported < matlab.apps.AppBase
             app.LengthofitemsidesSlider.MajorTickLabels = {'0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'};
             app.LengthofitemsidesSlider.ValueChangedFcn = createCallbackFcn(app, @LengthofitemsidesSliderValueChanged, true);
             app.LengthofitemsidesSlider.MinorTicks = [];
-            app.LengthofitemsidesSlider.Position = [15 155 267 7];
+            app.LengthofitemsidesSlider.Position = [18 155 267 7];
             app.LengthofitemsidesSlider.Value = 1;
 
             % Create WarningSquarelengthPlankdistanceLabel
@@ -869,6 +875,22 @@ classdef basic_exported < matlab.apps.AppBase
             app.nSpinner.Visible = 'off';
             app.nSpinner.Position = [236 87 43 22];
             app.nSpinner.Value = 3;
+
+            % Create MinimumlengthofneedlesLabel
+            app.MinimumlengthofneedlesLabel = uilabel(app.PlotControlsTab);
+            app.MinimumlengthofneedlesLabel.Visible = 'off';
+            app.MinimumlengthofneedlesLabel.Position = [12 236 148 22];
+            app.MinimumlengthofneedlesLabel.Text = 'Minimum length of needles';
+
+            % Create MinLengthOfNeedlesSlider
+            app.MinLengthOfNeedlesSlider = uislider(app.PlotControlsTab);
+            app.MinLengthOfNeedlesSlider.Limits = [1 10];
+            app.MinLengthOfNeedlesSlider.MajorTicks = [1 2 3 4 5 6 7 8 9 10];
+            app.MinLengthOfNeedlesSlider.MajorTickLabels = {'0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'};
+            app.MinLengthOfNeedlesSlider.MinorTicks = [];
+            app.MinLengthOfNeedlesSlider.Visible = 'off';
+            app.MinLengthOfNeedlesSlider.Position = [16 224 267 7];
+            app.MinLengthOfNeedlesSlider.Value = 1;
 
             % Create UIControlsTab
             app.UIControlsTab = uitab(app.TabGroup);
