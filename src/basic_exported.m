@@ -374,7 +374,7 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function saveCurrentNeedles(app)
-			file_name = ['needles_' char(randi([65 90],1,4)) '.mat'];
+			file_name = ['needles_' char(randi([65 90],1,4)) '_task' app.currentTask '.mat'];
 			
 			[file, path, ind] = uiputfile('*.mat', 'Save Needles...', file_name);
 			
@@ -391,20 +391,24 @@ classdef basic_exported < matlab.apps.AppBase
 			tn = app.N;
 			
 			%sq_angles
-			sxc = app.xc;
-			syc = app.yc;
-			sxcr = app.xcr;
-			sycr = app.ycr;
-        
 			%n_angles
-			snxc = app.nxc;
-			snyc = app.nyc;
-			snxcr = app.nxcr;
-			snycr = app.nycr;
-			snmd = app.nmd;
+			
+			if tn ~= 3
+				sxc = app.xc;
+				syc = app.yc;
+				sxcr = app.xcr;
+				sycr = app.ycr;
+				snmd = [];
+			else
+				sxc = app.nxc;
+				syc = app.nyc;
+				sxcr = app.nxcr;
+				sycr = app.nycr;
+				snmd = app.nmd;
+			end
 			
 			% Complete the save
-			save(filepath, 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snxc', 'snxcr', 'snyc', 'snycr', 'snmd');
+			save(filepath, 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snmd');
 		end
 		
 		function loadNewNeedles(app)
@@ -415,24 +419,39 @@ classdef basic_exported < matlab.apps.AppBase
 				return;
 			end
 			
-			load(fullfile(path, file), 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snxc', 'snxcr', 'snyc', 'snycr', 'snmd');
+			load(fullfile(path, file), 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snmd');
 			
 			% What are we loading?
-			ct = app.currentTask;
-			tn = app.N;
+			if app.overwriteOnImport == true
+				app.currentTask = ct;
+				if ct ~= 3
+					app.xc = sxc;
+					app.yc = syc;
+					app.xcr = sxcr;
+					app.ycr = sycr;
+				else
+					app.nxc = sxc;
+					app.nyc = syc;
+					app.nxcr = sxcr;
+					app.nycr = sycr;
+					app.nmd = snmd;
+				end
+			else
+				if ct ~= 3
+					app.xc = [app.xc, sxc];
+					app.yc = [app.xc, syc];
+					app.xcr = [app.xc, sxcr];
+					app.ycr = [app.xc, sycr];
+				else
+					app.nxc = [app.xc, sxc];
+					app.nyc = [app.xc, syc];
+					app.nxcr = [app.xc, sxcr];
+					app.nycr = [app.xc, sycr];
+					app.nmd = [app.xc, snmd];
+				end
+			end
 			
-			%sq_angles
-			sxc = app.xc;
-			syc = app.yc;
-			sxcr = app.xcr;
-			sycr = app.ycr;
-        
-			%n_angles
-			snxc = app.nxc;
-			snyc = app.nyc;
-			snxcr = app.nxcr;
-			snycr = app.nycr;
-			snmd = app.nmd;
+			% Show user new plot
 		end
         
         function highlightNeedles(app)
