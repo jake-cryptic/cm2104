@@ -103,6 +103,7 @@ classdef basic_exported < matlab.apps.AppBase
         uiIntersectPolyColor = [1 0 0]
         uiNonIntersectPolyColor = [0 1 0]
         uiSimilarPolyColor = [0.72 0.27 1.0]
+		autorun = false
         
 		% Logical masks for changing plot line colours
 		maskIntersecting
@@ -160,7 +161,9 @@ classdef basic_exported < matlab.apps.AppBase
 			app.DV = app.S / app.NoVP;
             makeWarningForLgtD(app);
 			
-			beginEstimation(app);
+			if app.autorun
+				beginEstimation(app);
+			end
         end
 		
         function updateHorizontalPlankCount(app, plankCount)
@@ -168,7 +171,9 @@ classdef basic_exported < matlab.apps.AppBase
 			app.DH = app.S / app.NoVP;
             makeWarningForLgtD(app);
             
-			beginEstimation(app);
+			if app.autorun
+				beginEstimation(app);
+			end
         end
         
         function makeWarningForLgtD(app)
@@ -181,7 +186,9 @@ classdef basic_exported < matlab.apps.AppBase
         
         function updateItemCount(app, itemCount)
 			app.N = itemCount;
-			beginEstimation(app);
+			if app.autorun
+				beginEstimation(app);
+			end
 		end
         
         function updateItemLength(app, itemLength)
@@ -192,7 +199,9 @@ classdef basic_exported < matlab.apps.AppBase
 			end
 			
 			app.SL = itemLength;
-			beginEstimation(app);
+			if app.autorun
+				beginEstimation(app);
+			end
         end
         
         function updateNeedleRanomisation(app)
@@ -754,7 +763,9 @@ classdef basic_exported < matlab.apps.AppBase
                 app.calc = 2;
             end
             
-            beginEstimation(app);
+			if app.autorun
+				beginEstimation(app);
+			end
         end
 
         % Value changed function: NHorizontalTilesSlider
@@ -784,7 +795,9 @@ classdef basic_exported < matlab.apps.AppBase
             selectedButton = app.SelectTaskButtonGroup.SelectedObject;
             UIUpdateCurrentTask(app, str2num(selectedButton.Text));
 			
-			beginEstimation(app);
+			if app.autorun
+				beginEstimation(app);
+			end
         end
 
         % Selection changed function: EstimatevalueusingButtonGroup
@@ -864,7 +877,9 @@ classdef basic_exported < matlab.apps.AppBase
 			
             app.RLB = minVal/10;
 			
-			beginEstimation(app);
+			if app.autorun
+				beginEstimation(app);
+			end
         end
 
         % Button pushed function: ClearButton
@@ -907,6 +922,13 @@ classdef basic_exported < matlab.apps.AppBase
 			if strcmp(selectedButton.Text, 'No')
 				app.overwriteOnImport = false;
 			end
+        end
+
+        % Value changed function: AutoRerunSimulation
+        function AutoRerunSimulationValueChanged(app, event)
+            value = app.AutoRerunSimulation.Value;
+            
+			app.autorun = strcmp(value, 'On');
         end
     end
 
@@ -1197,12 +1219,13 @@ classdef basic_exported < matlab.apps.AppBase
             app.SwitchLabel = uilabel(app.OutputTab);
             app.SwitchLabel.HorizontalAlignment = 'center';
             app.SwitchLabel.WordWrap = 'on';
-            app.SwitchLabel.Position = [85 117 194 50];
+            app.SwitchLabel.Position = [94 262 194 50];
             app.SwitchLabel.Text = 'Automatically re-run simulation when an important value changes';
 
             % Create AutoRerunSimulation
             app.AutoRerunSimulation = uiswitch(app.OutputTab, 'slider');
-            app.AutoRerunSimulation.Position = [45 137 21 9];
+            app.AutoRerunSimulation.ValueChangedFcn = createCallbackFcn(app, @AutoRerunSimulationValueChanged, true);
+            app.AutoRerunSimulation.Position = [34 278 41 18];
 
             % Create FigureTab
             app.FigureTab = uitab(app.TabGroup2);
