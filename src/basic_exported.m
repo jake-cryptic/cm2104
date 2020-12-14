@@ -3,6 +3,8 @@ classdef basic_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         UIFigure                        matlab.ui.Figure
+        UIAxes                          matlab.ui.control.UIAxes
+        OutEstimateLabel                matlab.ui.control.Label
         TabGroup                        matlab.ui.container.TabGroup
         PlotControlsTab                 matlab.ui.container.Tab
         EstimatevalueusingButtonGroup   matlab.ui.container.ButtonGroup
@@ -62,8 +64,6 @@ classdef basic_exported < matlab.apps.AppBase
         FilesTab                        matlab.ui.container.Tab
         LoadExportedNeedlesButton       matlab.ui.control.Button
         SaveCurrentNeedlesButton        matlab.ui.control.Button
-        OutEstimateLabel                matlab.ui.control.Label
-        UIAxes                          matlab.ui.control.UIAxes
     end
 
     
@@ -312,14 +312,15 @@ classdef basic_exported < matlab.apps.AppBase
 		
 		function calculateRandomLengthNeedlePi(app)
 			% Calculate the mean needle length
-			L = mean(app.RSL)
+			L = mean(app.RSL);
 			
 			% Calculate number of intersections
 			n = 0;
 			n = n + sum(floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
 			
 			% Use original buffons needle equation to estimate pi
-			pi_estimate = (2 * L * app.N) / n * app.DV;
+			%pi_estimate = (2 * app.N * L) / n * app.DV;
+			pi_estimate = (app.N * 2) / n;
 			UIUpdateOutEstimate(app, ['Random Length Needle Pi Estimate: ' num2str(pi_estimate)]);
 		end
 		
@@ -722,7 +723,12 @@ classdef basic_exported < matlab.apps.AppBase
         % Value changed function: MinLengthOfNeedlesSlider
         function MinLengthOfNeedlesSliderValueChanged(app, event)
             value = app.MinLengthOfNeedlesSlider.Value;
-            app.RLB = value;
+			
+            [~, minVal] = min(abs(value - event.Source.MajorTicks(:)));
+			event.Source.Value = event.Source.MajorTicks(minVal);
+			
+            app.RLB = minVal/10;
+			
 			beginEstimation(app);
         end
     end
@@ -737,6 +743,20 @@ classdef basic_exported < matlab.apps.AppBase
             app.UIFigure = uifigure('Visible', 'off');
             app.UIFigure.Position = [100 100 840 518];
             app.UIFigure.Name = 'MATLAB App';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Floor')
+            xlabel(app.UIAxes, 'X')
+            ylabel(app.UIAxes, 'Y')
+            app.UIAxes.XTick = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
+            app.UIAxes.Position = [301 50 540 469];
+
+            % Create OutEstimateLabel
+            app.OutEstimateLabel = uilabel(app.UIFigure);
+            app.OutEstimateLabel.FontSize = 16;
+            app.OutEstimateLabel.Position = [307 29 534 22];
+            app.OutEstimateLabel.Text = 'Pi Estimate: N/A';
 
             % Create TabGroup
             app.TabGroup = uitabgroup(app.UIFigure);
@@ -1094,22 +1114,8 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create SaveCurrentNeedlesButton
             app.SaveCurrentNeedlesButton = uibutton(app.FilesTab, 'push');
-            app.SaveCurrentNeedlesButton.Position = [29 448 134 22];
+            app.SaveCurrentNeedlesButton.Position = [84 417 134 22];
             app.SaveCurrentNeedlesButton.Text = 'Save Current Needles';
-
-            % Create OutEstimateLabel
-            app.OutEstimateLabel = uilabel(app.UIFigure);
-            app.OutEstimateLabel.FontSize = 16;
-            app.OutEstimateLabel.Position = [307 29 534 22];
-            app.OutEstimateLabel.Text = 'Pi Estimate: N/A';
-
-            % Create UIAxes
-            app.UIAxes = uiaxes(app.UIFigure);
-            title(app.UIAxes, 'Floor')
-            xlabel(app.UIAxes, 'X')
-            ylabel(app.UIAxes, 'Y')
-            app.UIAxes.XTick = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
-            app.UIAxes.Position = [301 50 540 469];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
