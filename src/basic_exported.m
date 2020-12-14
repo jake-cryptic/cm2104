@@ -63,6 +63,8 @@ classdef basic_exported < matlab.apps.AppBase
         changesReplotWarningLabel       matlab.ui.control.Label
         CurrentFigureBackgroundColour   matlab.ui.control.Lamp
         ModifyFigureBackgroundColourButton  matlab.ui.control.Button
+        NeedleLineThicknessSpinnerLabel  matlab.ui.control.Label
+        NeedleLineThicknessSpinner      matlab.ui.control.Spinner
         FilesTab                        matlab.ui.container.Tab
         LoadExportedNeedlesButton       matlab.ui.control.Button
         SaveCurrentNeedlesButton        matlab.ui.control.Button
@@ -87,7 +89,8 @@ classdef basic_exported < matlab.apps.AppBase
         Similar =   3                   % Number of similar needles
         
         % Customisation variables
-        uiGridlineWidth =   1
+        uiGridlineWidth = 2
+		uiNeedleLineWidth = 1
         uiGridlineColor = [0 0 0]
         uiSelectedPolyColor = [0 0 1]
         uiIntersectPolyColor = [1 0 0]
@@ -239,7 +242,7 @@ classdef basic_exported < matlab.apps.AppBase
 			
             % Plot needles
             hold(app.UIAxes, 'on');
-            app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', 2, 'Color', app.uiIntersectPolyColor);
+            app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', app.uiNeedleLineWidth, 'Color', app.uiIntersectPolyColor);
             hold(app.UIAxes, 'off');
             
             % Change color of those who do not intersect
@@ -358,7 +361,11 @@ classdef basic_exported < matlab.apps.AppBase
 			
 			rt_estimate = 2 - total_con_over_int;
 			UIUpdateOutEstimate(app, ['Sqrt(2) Estimate: ' num2str(rt_estimate)]);
-        end
+		end
+		
+		function saveCurrentNeedles(app)
+			
+		end
         
         function highlightNeedles(app)
             disp(app.highlightTask);
@@ -748,6 +755,19 @@ classdef basic_exported < matlab.apps.AppBase
 			set(app.CurrentFigureBackgroundColour, 'Color', c);
             set(app.UIAxes, 'Color', c);
         end
+
+        % Button pushed function: SaveCurrentNeedlesButton
+        function SaveCurrentNeedlesButtonPushed(app, event)
+			saveCurrentNeedles(app);
+        end
+
+        % Value changed function: NeedleLineThicknessSpinner
+        function NeedleLineThicknessSpinnerValueChanged(app, event)
+            value = app.NeedleLineThicknessSpinner.Value;
+			
+			app.uiNeedleLineWidth = value;
+            set(app.plt, 'LineWidth', value);
+        end
     end
 
     % Component initialization
@@ -1051,33 +1071,33 @@ classdef basic_exported < matlab.apps.AppBase
             % Create ModifyShapeColourNonIntersectButton
             app.ModifyShapeColourNonIntersectButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourNonIntersectButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourNonIntersectButtonPushed, true);
-            app.ModifyShapeColourNonIntersectButton.Position = [48 304 229 22];
+            app.ModifyShapeColourNonIntersectButton.Position = [48 278 229 22];
             app.ModifyShapeColourNonIntersectButton.Text = 'Modify Non-intersecting Polygon Colour';
 
             % Create CurrentShapeColourNonIntersect
             app.CurrentShapeColourNonIntersect = uilamp(app.FigureTab);
-            app.CurrentShapeColourNonIntersect.Position = [17 303 25 25];
+            app.CurrentShapeColourNonIntersect.Position = [16 277 25 25];
 
             % Create ModifyShapeColourIntersectButton
             app.ModifyShapeColourIntersectButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourIntersectButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourIntersectButtonPushed, true);
-            app.ModifyShapeColourIntersectButton.Position = [61 338 204 22];
+            app.ModifyShapeColourIntersectButton.Position = [61 312 204 22];
             app.ModifyShapeColourIntersectButton.Text = 'Modify Intersecting Polygon Colour';
 
             % Create CurrentShapeColourIntersect
             app.CurrentShapeColourIntersect = uilamp(app.FigureTab);
-            app.CurrentShapeColourIntersect.Position = [16 338 25 25];
+            app.CurrentShapeColourIntersect.Position = [16 312 25 25];
             app.CurrentShapeColourIntersect.Color = [1 0 0];
 
             % Create ModifyGridLineColourButton
             app.ModifyGridLineColourButton = uibutton(app.FigureTab, 'push');
             app.ModifyGridLineColourButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyGridLineColourButtonPushed, true);
-            app.ModifyGridLineColourButton.Position = [92 404 142 22];
+            app.ModifyGridLineColourButton.Position = [92 377 142 22];
             app.ModifyGridLineColourButton.Text = 'Modify Grid Line Colour';
 
             % Create CurrentGridLineColour
             app.CurrentGridLineColour = uilamp(app.FigureTab);
-            app.CurrentGridLineColour.Position = [17 403 25 25];
+            app.CurrentGridLineColour.Position = [16 376 25 25];
             app.CurrentGridLineColour.Color = [0 0 0];
 
             % Create GridLineThicknessSpinnerLabel
@@ -1096,23 +1116,23 @@ classdef basic_exported < matlab.apps.AppBase
             % Create ModifyShapeColourSelectedButton
             app.ModifyShapeColourSelectedButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourSelectedButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourSelectedButtonPushed, true);
-            app.ModifyShapeColourSelectedButton.Position = [73 270 181 22];
+            app.ModifyShapeColourSelectedButton.Position = [73 244 181 22];
             app.ModifyShapeColourSelectedButton.Text = 'Modify Selected Needle Colour';
 
             % Create CurrentShapeColourSelected
             app.CurrentShapeColourSelected = uilamp(app.FigureTab);
-            app.CurrentShapeColourSelected.Position = [17 269 25 25];
+            app.CurrentShapeColourSelected.Position = [16 243 25 25];
             app.CurrentShapeColourSelected.Color = [0 0 1];
 
             % Create ModifyShapeColourSimilarButton
             app.ModifyShapeColourSimilarButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourSimilarButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourSimilarButtonPushed, true);
-            app.ModifyShapeColourSimilarButton.Position = [73 238 181 22];
+            app.ModifyShapeColourSimilarButton.Position = [73 212 181 22];
             app.ModifyShapeColourSimilarButton.Text = 'Modify Similar Needle Colour';
 
             % Create CurrentShapeColourSimilar
             app.CurrentShapeColourSimilar = uilamp(app.FigureTab);
-            app.CurrentShapeColourSimilar.Position = [17 237 25 25];
+            app.CurrentShapeColourSimilar.Position = [16 211 25 25];
             app.CurrentShapeColourSimilar.Color = [0.7216 0.2706 1];
 
             % Create changesReplotWarningLabel
@@ -1120,19 +1140,33 @@ classdef basic_exported < matlab.apps.AppBase
             app.changesReplotWarningLabel.FontSize = 11;
             app.changesReplotWarningLabel.FontColor = [1 0 0];
             app.changesReplotWarningLabel.Visible = 'off';
-            app.changesReplotWarningLabel.Position = [7 205 313 27];
+            app.changesReplotWarningLabel.Position = [7 179 313 27];
             app.changesReplotWarningLabel.Text = '* These changes will be applied once you re-plot the figure';
 
             % Create CurrentFigureBackgroundColour
             app.CurrentFigureBackgroundColour = uilamp(app.FigureTab);
-            app.CurrentFigureBackgroundColour.Position = [16 370 25 25];
+            app.CurrentFigureBackgroundColour.Position = [16 343 25 25];
             app.CurrentFigureBackgroundColour.Color = [1 1 1];
 
             % Create ModifyFigureBackgroundColourButton
             app.ModifyFigureBackgroundColourButton = uibutton(app.FigureTab, 'push');
             app.ModifyFigureBackgroundColourButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyFigureBackgroundColourButtonPushed, true);
-            app.ModifyFigureBackgroundColourButton.Position = [66 371 195 22];
+            app.ModifyFigureBackgroundColourButton.Position = [66 344 195 22];
             app.ModifyFigureBackgroundColourButton.Text = 'Modify Figure Background Colour';
+
+            % Create NeedleLineThicknessSpinnerLabel
+            app.NeedleLineThicknessSpinnerLabel = uilabel(app.FigureTab);
+            app.NeedleLineThicknessSpinnerLabel.HorizontalAlignment = 'right';
+            app.NeedleLineThicknessSpinnerLabel.Position = [16 406 127 22];
+            app.NeedleLineThicknessSpinnerLabel.Text = 'Needle Line Thickness';
+
+            % Create NeedleLineThicknessSpinner
+            app.NeedleLineThicknessSpinner = uispinner(app.FigureTab);
+            app.NeedleLineThicknessSpinner.Step = 0.5;
+            app.NeedleLineThicknessSpinner.Limits = [1 5];
+            app.NeedleLineThicknessSpinner.ValueChangedFcn = createCallbackFcn(app, @NeedleLineThicknessSpinnerValueChanged, true);
+            app.NeedleLineThicknessSpinner.Position = [158 406 100 22];
+            app.NeedleLineThicknessSpinner.Value = 2;
 
             % Create FilesTab
             app.FilesTab = uitab(app.TabGroup);
@@ -1145,7 +1179,8 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create SaveCurrentNeedlesButton
             app.SaveCurrentNeedlesButton = uibutton(app.FilesTab, 'push');
-            app.SaveCurrentNeedlesButton.Position = [84 417 134 22];
+            app.SaveCurrentNeedlesButton.ButtonPushedFcn = createCallbackFcn(app, @SaveCurrentNeedlesButtonPushed, true);
+            app.SaveCurrentNeedlesButton.Position = [85 418 134 22];
             app.SaveCurrentNeedlesButton.Text = 'Save Current Needles';
 
             % Create OutEstimateLabel
