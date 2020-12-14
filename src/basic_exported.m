@@ -61,6 +61,8 @@ classdef basic_exported < matlab.apps.AppBase
         ModifyShapeColourSimilarButton  matlab.ui.control.Button
         CurrentShapeColourSimilar       matlab.ui.control.Lamp
         changesReplotWarningLabel       matlab.ui.control.Label
+        CurrentFigureBackgroundColour   matlab.ui.control.Lamp
+        ModifyFigureBackgroundColourButton  matlab.ui.control.Button
         FilesTab                        matlab.ui.container.Tab
         LoadExportedNeedlesButton       matlab.ui.control.Button
         SaveCurrentNeedlesButton        matlab.ui.control.Button
@@ -739,6 +741,13 @@ classdef basic_exported < matlab.apps.AppBase
 			UIDoClearAxes(app);
 			UIUpdateOutEstimate(app, 'Figure was cleared');
         end
+
+        % Button pushed function: ModifyFigureBackgroundColourButton
+        function ModifyFigureBackgroundColourButtonPushed(app, event)
+            c = uisetcolor([1, 1, 1], 'Change figure background colour');
+			set(app.CurrentFigureBackgroundColour, 'Color', c);
+            set(app.UIAxes, 'Color', c);
+        end
     end
 
     % Component initialization
@@ -1042,22 +1051,22 @@ classdef basic_exported < matlab.apps.AppBase
             % Create ModifyShapeColourNonIntersectButton
             app.ModifyShapeColourNonIntersectButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourNonIntersectButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourNonIntersectButtonPushed, true);
-            app.ModifyShapeColourNonIntersectButton.Position = [47 336 229 22];
+            app.ModifyShapeColourNonIntersectButton.Position = [48 304 229 22];
             app.ModifyShapeColourNonIntersectButton.Text = 'Modify Non-intersecting Polygon Colour';
 
             % Create CurrentShapeColourNonIntersect
             app.CurrentShapeColourNonIntersect = uilamp(app.FigureTab);
-            app.CurrentShapeColourNonIntersect.Position = [16 335 25 25];
+            app.CurrentShapeColourNonIntersect.Position = [17 303 25 25];
 
             % Create ModifyShapeColourIntersectButton
             app.ModifyShapeColourIntersectButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourIntersectButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourIntersectButtonPushed, true);
-            app.ModifyShapeColourIntersectButton.Position = [60 370 204 22];
+            app.ModifyShapeColourIntersectButton.Position = [61 338 204 22];
             app.ModifyShapeColourIntersectButton.Text = 'Modify Intersecting Polygon Colour';
 
             % Create CurrentShapeColourIntersect
             app.CurrentShapeColourIntersect = uilamp(app.FigureTab);
-            app.CurrentShapeColourIntersect.Position = [15 370 25 25];
+            app.CurrentShapeColourIntersect.Position = [16 338 25 25];
             app.CurrentShapeColourIntersect.Color = [1 0 0];
 
             % Create ModifyGridLineColourButton
@@ -1068,7 +1077,7 @@ classdef basic_exported < matlab.apps.AppBase
 
             % Create CurrentGridLineColour
             app.CurrentGridLineColour = uilamp(app.FigureTab);
-            app.CurrentGridLineColour.Position = [15 403 25 25];
+            app.CurrentGridLineColour.Position = [17 403 25 25];
             app.CurrentGridLineColour.Color = [0 0 0];
 
             % Create GridLineThicknessSpinnerLabel
@@ -1087,23 +1096,23 @@ classdef basic_exported < matlab.apps.AppBase
             % Create ModifyShapeColourSelectedButton
             app.ModifyShapeColourSelectedButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourSelectedButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourSelectedButtonPushed, true);
-            app.ModifyShapeColourSelectedButton.Position = [72 302 181 22];
+            app.ModifyShapeColourSelectedButton.Position = [73 270 181 22];
             app.ModifyShapeColourSelectedButton.Text = 'Modify Selected Needle Colour';
 
             % Create CurrentShapeColourSelected
             app.CurrentShapeColourSelected = uilamp(app.FigureTab);
-            app.CurrentShapeColourSelected.Position = [16 301 25 25];
+            app.CurrentShapeColourSelected.Position = [17 269 25 25];
             app.CurrentShapeColourSelected.Color = [0 0 1];
 
             % Create ModifyShapeColourSimilarButton
             app.ModifyShapeColourSimilarButton = uibutton(app.FigureTab, 'push');
             app.ModifyShapeColourSimilarButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyShapeColourSimilarButtonPushed, true);
-            app.ModifyShapeColourSimilarButton.Position = [72 271 181 22];
+            app.ModifyShapeColourSimilarButton.Position = [73 238 181 22];
             app.ModifyShapeColourSimilarButton.Text = 'Modify Similar Needle Colour';
 
             % Create CurrentShapeColourSimilar
             app.CurrentShapeColourSimilar = uilamp(app.FigureTab);
-            app.CurrentShapeColourSimilar.Position = [16 270 25 25];
+            app.CurrentShapeColourSimilar.Position = [17 237 25 25];
             app.CurrentShapeColourSimilar.Color = [0.7216 0.2706 1];
 
             % Create changesReplotWarningLabel
@@ -1111,8 +1120,19 @@ classdef basic_exported < matlab.apps.AppBase
             app.changesReplotWarningLabel.FontSize = 11;
             app.changesReplotWarningLabel.FontColor = [1 0 0];
             app.changesReplotWarningLabel.Visible = 'off';
-            app.changesReplotWarningLabel.Position = [7 230 313 27];
+            app.changesReplotWarningLabel.Position = [7 205 313 27];
             app.changesReplotWarningLabel.Text = '* These changes will be applied once you re-plot the figure';
+
+            % Create CurrentFigureBackgroundColour
+            app.CurrentFigureBackgroundColour = uilamp(app.FigureTab);
+            app.CurrentFigureBackgroundColour.Position = [16 370 25 25];
+            app.CurrentFigureBackgroundColour.Color = [1 1 1];
+
+            % Create ModifyFigureBackgroundColourButton
+            app.ModifyFigureBackgroundColourButton = uibutton(app.FigureTab, 'push');
+            app.ModifyFigureBackgroundColourButton.ButtonPushedFcn = createCallbackFcn(app, @ModifyFigureBackgroundColourButtonPushed, true);
+            app.ModifyFigureBackgroundColourButton.Position = [66 371 195 22];
+            app.ModifyFigureBackgroundColourButton.Text = 'Modify Figure Background Colour';
 
             % Create FilesTab
             app.FilesTab = uitab(app.TabGroup);
