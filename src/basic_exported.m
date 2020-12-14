@@ -374,11 +374,65 @@ classdef basic_exported < matlab.apps.AppBase
 		end
 		
 		function saveCurrentNeedles(app)
-			f = uiputfile();
+			file_name = ['needles_' char(randi([65 90],1,4)) '.mat'];
+			
+			[file, path, ind] = uiputfile('*.mat', 'Save Needles...', file_name);
+			
+			% Check if user cancelled
+			if file == 0
+				return;
+			end
+			
+			% Get full file path
+			filepath = fullfile(path, file);
+			
+			% What are we saving?
+			ct = app.currentTask;
+			tn = app.N;
+			
+			%sq_angles
+			sxc = app.xc;
+			syc = app.yc;
+			sxcr = app.xcr;
+			sycr = app.ycr;
+        
+			%n_angles
+			snxc = app.nxc;
+			snyc = app.nyc;
+			snxcr = app.nxcr;
+			snycr = app.nycr;
+			snmd = app.nmd;
+			
+			% Complete the save
+			save(filepath, 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snxc', 'snxcr', 'snyc', 'snycr', 'snmd');
 		end
 		
 		function loadNewNeedles(app)
+			[file, path] = uigetfile('*.mat');
 			
+			if isequal(file, 0)
+				disp('User selected Cancel');
+				return;
+			end
+			
+			load(fullfile(path, file), 'ct', 'tn', 'sxc', 'sxcr', 'syc', 'sycr', 'snxc', 'snxcr', 'snyc', 'snycr', 'snmd');
+			
+			% What are we loading?
+			ct = app.currentTask;
+			tn = app.N;
+			
+			%sq_angles
+			sxc = app.xc;
+			syc = app.yc;
+			sxcr = app.xcr;
+			sycr = app.ycr;
+        
+			%n_angles
+			snxc = app.nxc;
+			snyc = app.nyc;
+			snxcr = app.nxcr;
+			snycr = app.nycr;
+			snmd = app.nmd;
 		end
         
         function highlightNeedles(app)
