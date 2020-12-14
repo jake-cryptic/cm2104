@@ -66,8 +66,15 @@ classdef basic_exported < matlab.apps.AppBase
         NeedleLineThicknessSpinnerLabel  matlab.ui.control.Label
         NeedleLineThicknessSpinner      matlab.ui.control.Spinner
         FilesTab                        matlab.ui.container.Tab
-        LoadExportedNeedlesButton       matlab.ui.control.Button
-        SaveCurrentNeedlesButton        matlab.ui.control.Button
+        ImportNewNeedlesButton          matlab.ui.control.Button
+        ExportCurrentNeedlesButton      matlab.ui.control.Button
+        OverwritecurrentplotonimportButtonGroup  matlab.ui.container.ButtonGroup
+        YesButton                       matlab.ui.control.ToggleButton
+        NoButton                        matlab.ui.control.ToggleButton
+        SaveCurrentPlotLabel            matlab.ui.control.Label
+        LoadExportedPlotLabel           matlab.ui.control.Label
+        LoadExportedDescLabel           matlab.ui.control.Label
+        LoadExportedDescLabel_2         matlab.ui.control.Label
         OutEstimateLabel                matlab.ui.control.Label
         UIAxes                          matlab.ui.control.UIAxes
     end
@@ -104,6 +111,9 @@ classdef basic_exported < matlab.apps.AppBase
         % Task state of UI
         currentTask = 1
         highlightTask = 0
+		
+		% Import / Export settings
+		overwriteOnImport = true
 		
 		% Patch & plot objects
 		pat
@@ -760,8 +770,8 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.UIAxes, 'Color', c);
         end
 
-        % Button pushed function: SaveCurrentNeedlesButton
-        function SaveCurrentNeedlesButtonPushed(app, event)
+        % Button pushed function: ExportCurrentNeedlesButton
+        function ExportCurrentNeedlesButtonPushed(app, event)
 			saveCurrentNeedles(app);
         end
 
@@ -773,9 +783,20 @@ classdef basic_exported < matlab.apps.AppBase
             set(app.plt, 'LineWidth', value);
         end
 
-        % Button pushed function: LoadExportedNeedlesButton
-        function LoadExportedNeedlesButtonPushed(app, event)
+        % Button pushed function: ImportNewNeedlesButton
+        function ImportNewNeedlesButtonPushed(app, event)
             loadNewNeedles(app);
+        end
+
+        % Selection changed function: 
+        % OverwritecurrentplotonimportButtonGroup
+        function OverwritecurrentplotonimportButtonGroupSelectionChanged(app, event)
+            selectedButton = app.OverwritecurrentplotonimportButtonGroup.SelectedObject;
+			
+            app.overwriteOnImport = true;
+			if strcmp(selectedButton.Text, 'No')
+				app.overwriteOnImport = false;
+			end
         end
     end
 
@@ -1181,17 +1202,58 @@ classdef basic_exported < matlab.apps.AppBase
             app.FilesTab = uitab(app.TabGroup);
             app.FilesTab.Title = 'Files';
 
-            % Create LoadExportedNeedlesButton
-            app.LoadExportedNeedlesButton = uibutton(app.FilesTab, 'push');
-            app.LoadExportedNeedlesButton.ButtonPushedFcn = createCallbackFcn(app, @LoadExportedNeedlesButtonPushed, true);
-            app.LoadExportedNeedlesButton.Position = [78 248 141 22];
-            app.LoadExportedNeedlesButton.Text = 'Load Exported Needles';
+            % Create ImportNewNeedlesButton
+            app.ImportNewNeedlesButton = uibutton(app.FilesTab, 'push');
+            app.ImportNewNeedlesButton.ButtonPushedFcn = createCallbackFcn(app, @ImportNewNeedlesButtonPushed, true);
+            app.ImportNewNeedlesButton.Position = [153 192 141 22];
+            app.ImportNewNeedlesButton.Text = 'Import New Needles';
 
-            % Create SaveCurrentNeedlesButton
-            app.SaveCurrentNeedlesButton = uibutton(app.FilesTab, 'push');
-            app.SaveCurrentNeedlesButton.ButtonPushedFcn = createCallbackFcn(app, @SaveCurrentNeedlesButtonPushed, true);
-            app.SaveCurrentNeedlesButton.Position = [85 418 134 22];
-            app.SaveCurrentNeedlesButton.Text = 'Save Current Needles';
+            % Create ExportCurrentNeedlesButton
+            app.ExportCurrentNeedlesButton = uibutton(app.FilesTab, 'push');
+            app.ExportCurrentNeedlesButton.ButtonPushedFcn = createCallbackFcn(app, @ExportCurrentNeedlesButtonPushed, true);
+            app.ExportCurrentNeedlesButton.Position = [152 378 141 22];
+            app.ExportCurrentNeedlesButton.Text = 'Export Current Needles';
+
+            % Create OverwritecurrentplotonimportButtonGroup
+            app.OverwritecurrentplotonimportButtonGroup = uibuttongroup(app.FilesTab);
+            app.OverwritecurrentplotonimportButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @OverwritecurrentplotonimportButtonGroupSelectionChanged, true);
+            app.OverwritecurrentplotonimportButtonGroup.Title = 'Overwrite current plot on import?';
+            app.OverwritecurrentplotonimportButtonGroup.Position = [12 225 273 55];
+
+            % Create YesButton
+            app.YesButton = uitogglebutton(app.OverwritecurrentplotonimportButtonGroup);
+            app.YesButton.Text = 'Yes';
+            app.YesButton.Position = [11 7 100 22];
+            app.YesButton.Value = true;
+
+            % Create NoButton
+            app.NoButton = uitogglebutton(app.OverwritecurrentplotonimportButtonGroup);
+            app.NoButton.Text = 'No';
+            app.NoButton.Position = [114 7 100 22];
+
+            % Create SaveCurrentPlotLabel
+            app.SaveCurrentPlotLabel = uilabel(app.FilesTab);
+            app.SaveCurrentPlotLabel.FontSize = 16;
+            app.SaveCurrentPlotLabel.Position = [14 462 131 22];
+            app.SaveCurrentPlotLabel.Text = 'Save Current Plot';
+
+            % Create LoadExportedPlotLabel
+            app.LoadExportedPlotLabel = uilabel(app.FilesTab);
+            app.LoadExportedPlotLabel.FontSize = 16;
+            app.LoadExportedPlotLabel.Position = [16 333 141 22];
+            app.LoadExportedPlotLabel.Text = 'Load Exported Plot';
+
+            % Create LoadExportedDescLabel
+            app.LoadExportedDescLabel = uilabel(app.FilesTab);
+            app.LoadExportedDescLabel.WordWrap = 'on';
+            app.LoadExportedDescLabel.Position = [17 293 269 32];
+            app.LoadExportedDescLabel.Text = 'This option allows you to load previously saved needles in order to improve your estimate.';
+
+            % Create LoadExportedDescLabel_2
+            app.LoadExportedDescLabel_2 = uilabel(app.FilesTab);
+            app.LoadExportedDescLabel_2.WordWrap = 'on';
+            app.LoadExportedDescLabel_2.Position = [16 420 269 32];
+            app.LoadExportedDescLabel_2.Text = 'Saving Needles right now will mean that all 0 needles from task 3 will be exported.';
 
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.GridLayout);
