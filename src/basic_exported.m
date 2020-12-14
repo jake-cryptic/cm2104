@@ -1385,8 +1385,8 @@ classdef basic_exported < matlab.apps.AppBase
             % Create LoadExportedDescLabel_2
             app.LoadExportedDescLabel_2 = uilabel(app.FilesTab);
             app.LoadExportedDescLabel_2.WordWrap = 'on';
-            app.LoadExportedDescLabel_2.Position = [16 420 269 32];
-            app.LoadExportedDescLabel_2.Text = 'Saving Needles right now will mean that all 0 needles from task 3 will be exported.';
+            app.LoadExportedDescLabel_2.Position = [16 410 269 42];
+            app.LoadExportedDescLabel_2.Text = 'Saving Needles right now will mean that all needles from the currently selected task are saved.';
 
             % Create OutEstimateLabel
             app.OutEstimateLabel = uilabel(app.GridLayout);
