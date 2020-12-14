@@ -28,7 +28,7 @@ classdef basic_exported < matlab.apps.AppBase
         ButtonTask1                     matlab.ui.control.ToggleButton
         ButtonTask2                     matlab.ui.control.ToggleButton
         ButtonTask3                     matlab.ui.control.ToggleButton
-        ButtonTask3_2                   matlab.ui.control.ToggleButton
+        ButtonTask5                     matlab.ui.control.ToggleButton
         SelectedNeedleControlsButtonGroup  matlab.ui.container.ButtonGroup
         DonothingButton                 matlab.ui.control.ToggleButton
         HighlightsimilaranglesButton    matlab.ui.control.ToggleButton
@@ -243,7 +243,11 @@ classdef basic_exported < matlab.apps.AppBase
             
 			workOutNeedleGradients(app);
             
-            % Find those that intersect either a y-line or x-line
+            plotNeedles(app);
+		end
+		
+		function plotNeedles(app)
+			% Find those that intersect either a y-line or x-line
 			if app.currentTask == 3
 				intersecting = (floor(app.nyc / app.DH) ~= floor(app.nycr / app.DH)) | (floor(app.nxc / app.DV) ~= floor(app.nxcr / app.DV));
 			else
@@ -251,9 +255,7 @@ classdef basic_exported < matlab.apps.AppBase
 			end
 			
             % Plot needles
-            hold(app.UIAxes, 'on');
             app.plt = plot(app.UIAxes, [app.nxc; app.nxcr], [app.nyc; app.nycr], 'LineWidth', app.uiNeedleLineWidth, 'Color', app.uiIntersectPolyColor);
-            hold(app.UIAxes, 'off');
             
             % Change color of those who do not intersect
             set(app.plt(~intersecting), 'Color', app.uiNonIntersectPolyColor);
@@ -301,6 +303,10 @@ classdef basic_exported < matlab.apps.AppBase
                 calculateSquareSqrtTwo(app);
             end
             
+			plotSquares(app);
+		end
+		
+		function plotSquares(app)
             % Find squares that intersect
             intersecting = floor(app.xcr(1, :)/app.DV) ~= floor(app.xcr(2, :)/app.DV) | floor(app.xcr(2, :)/app.DV) ~= floor(app.xcr(3, :)/app.DV) |...
                 floor(app.xcr(3, :)/app.DV) ~= floor(app.xcr(4, :)/app.DV) | floor(app.xcr(4, :)/app.DV) ~= floor(app.xcr(1, :)/app.DV);
@@ -376,7 +382,7 @@ classdef basic_exported < matlab.apps.AppBase
 		function saveCurrentNeedles(app)
 			file_name = ['needles_' char(randi([65 90],1,4)) '_task' app.currentTask '.mat'];
 			
-			[file, path, ind] = uiputfile('*.mat', 'Save Needles...', file_name);
+			[file, path, ~] = uiputfile('*.mat', 'Save Needles...', file_name);
 			
 			% Check if user cancelled
 			if file == 0
@@ -423,7 +429,7 @@ classdef basic_exported < matlab.apps.AppBase
 			
 			% What are we loading?
 			if app.overwriteOnImport == true
-				app.currentTask = ct;
+				app.N = tn;
 				if ct ~= 3
 					app.xc = sxc;
 					app.yc = syc;
@@ -437,6 +443,7 @@ classdef basic_exported < matlab.apps.AppBase
 					app.nmd = snmd;
 				end
 			else
+				app.N = app.N + tn;
 				if ct ~= 3
 					app.xc = [app.xc, sxc];
 					app.yc = [app.xc, syc];
@@ -452,6 +459,24 @@ classdef basic_exported < matlab.apps.AppBase
 			end
 			
 			% Show user new plot
+			UIUpdateCurrentTask(app, ct);
+			
+			switch ct
+				case 1
+					set(app.ButtonTask1, 'Value', true);
+				case 2
+					set(app.ButtonTask2, 'Value', true);
+				case 3
+					set(app.ButtonTask3, 'Value', true);
+				case 5
+					set(app.ButtonTask5, 'Value', true);
+			end
+			
+			if ct ~= 3
+				plotSquares(app);
+			else
+				plotNeedles(app);
+			end
 		end
         
         function highlightNeedles(app)
@@ -1049,10 +1074,10 @@ classdef basic_exported < matlab.apps.AppBase
             app.ButtonTask3.Text = '3';
             app.ButtonTask3.Position = [133 5 51 22];
 
-            % Create ButtonTask3_2
-            app.ButtonTask3_2 = uitogglebutton(app.SelectTaskButtonGroup);
-            app.ButtonTask3_2.Text = '5';
-            app.ButtonTask3_2.Position = [194 5 51 22];
+            % Create ButtonTask5
+            app.ButtonTask5 = uitogglebutton(app.SelectTaskButtonGroup);
+            app.ButtonTask5.Text = '5';
+            app.ButtonTask5.Position = [194 5 51 22];
 
             % Create SelectedNeedleControlsButtonGroup
             app.SelectedNeedleControlsButtonGroup = uibuttongroup(app.PlotControlsTab);
